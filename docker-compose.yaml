@@ -1,0 +1,47 @@
+services:
+  alembic:
+    build: .
+    command: alembic upgrade head
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      
+    volumes:
+      - .:/app
+    networks:
+      - observer_network
+
+
+  web:
+    build: .
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "${FLASK_PORT}:${FLASK_PORT}"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - alembic
+    volumes:
+      - .:/app
+    command: gunicorn -c gunicorn.conf.py --worker-class eventlet -w 1 run:app
+    networks:
+      - observer_network
+
+  init_password:
+    build: .
+    command: python password.py  # Запуск скрипта для добавления админа
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - alembic
+    networks:
+      - observer_network
+    volumes:
+      - .:/app
+
+
+
+networks:
+  observer_network:
+    external: true

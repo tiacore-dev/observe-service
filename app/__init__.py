@@ -10,23 +10,23 @@ import os
 from dotenv import load_dotenv
 
 # Настройка логирования
-"""logging.basicConfig(
+logging.basicConfig(
     level=logging.INFO,  # Уровень логирования
     format='%(asctime)s - %(levelname)s - %(message)s',  # Формат сообщений
     handlers=[
         logging.FileHandler("app.log", mode="a"),  # Запись в файл
         logging.StreamHandler()  # Вывод в консоль
     ]
-)"""
+)
 # Настраиваем логирование
-logging.basicConfig(
+"""logging.basicConfig(
     level=logging.DEBUG,  # Устанавливаем уровень DEBUG
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),  # Логи будут выводиться в консоль
         logging.FileHandler('debug.log')  # Логи также сохраняются в файл debug.log
     ]
-)
+)"""
 
 load_dotenv()
 

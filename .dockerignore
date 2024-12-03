@@ -1,0 +1,29 @@
+# Игнорируем файлы конфигурации и окружения
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+audio_files_examples/
+
+# Игнорируем директории с миграциями
+alembic/
+migrations/
+
+celery_docker
+
+beack_up_process_audio
+
+# Игнорируем временные файлы
+*.log
+*.tmp
+*.swp
+
+# Игнорируем системные файлы
+.DS_Store
+Thumbs.db
+
+# Игнорируем другие ненужные файлы
+*.git
+*.gitignore
