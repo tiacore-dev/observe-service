@@ -2,8 +2,8 @@ services:
   alembic:
     build: .
     command: alembic upgrade head
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
+    #environment:
+      #- DATABASE_URL=${DATABASE_URL}
       
     volumes:
       - .:/app
@@ -18,8 +18,8 @@ services:
       - 8.8.4.4
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
+    #environment:
+      #- DATABASE_URL=${DATABASE_URL}
     depends_on:
       - alembic
     volumes:
@@ -31,8 +31,8 @@ services:
   init_password:
     build: .
     command: python password.py  # Запуск скрипта для добавления админа
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
+    #environment:
+      #- DATABASE_URL=${DATABASE_URL}
     depends_on:
       - alembic
     networks:
