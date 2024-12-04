@@ -18,11 +18,16 @@ def test_requests():
             logging.info("Библиотека requests работает корректно.")
             logging.info("Ответ сервера:")
             logging.info(response.json())
+                # Пример возврата результата
+            return jsonify({"message": "Успешно обработано"}), 200
         else:
             logging.warning(f"Сервер вернул статус: {response.status_code}")
+            return jsonify({"message": "Ошибка"}), response.status_code
     except requests.exceptions.RequestException as e:
         logging.error("Ошибка при выполнении запроса:")
         logging.error(e)
+        return jsonify({"message": e}), response.status_code
+
 
 
 # Эндпоинт для получения данных от первого бота
