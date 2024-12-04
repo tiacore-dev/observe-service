@@ -8,6 +8,7 @@ import openai
 from app.routes import register_routes
 import os
 from dotenv import load_dotenv
+from app.openai_funcs import init_openai
 
 # Настройка логирования
 logging.basicConfig(
@@ -57,7 +58,7 @@ def create_app():
 
     # Инициализация OpenAI
     try:
-        openai.api_key = os.getenv('OPENAI_API_KEY')
+        init_openai(app)
         logging.info("OpenAI успешно инициализирован.", extra={'user_id': 'init'})
     except Exception as e:
         logging.error(f"Ошибка при инициализации OpenAI: {e}", extra={'user_id': 'init'})

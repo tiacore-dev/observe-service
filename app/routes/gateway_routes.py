@@ -3,7 +3,7 @@ import logging
 from app.utils.bot_utils import add_text, add_file
 import base64
 from io import BytesIO
-from app.openai_funcs import transcribe_audio
+from app.openai_funcs.openai_funcs import transcribe_audio
 import json
 
 gateway_bp = Blueprint('gateway', __name__)

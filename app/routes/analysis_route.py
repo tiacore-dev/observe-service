@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template
 from app.utils.db_get import get_prompt
-from app.openai_funcs import chatgpt_analyze
+from app.openai_funcs.openai_funcs import chatgpt_analyze
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 

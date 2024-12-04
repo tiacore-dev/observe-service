@@ -1,1 +1,1 @@
-from .openai_funcs import transcribe_audio, chatgpt_analyze
+from .openai_setup import init_openai
