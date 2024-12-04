@@ -33,12 +33,12 @@ def protected():
 @jwt_required()  # Требуется авторизация с JWT
 def get_username():
     current_user = get_jwt_identity()
-    from app.database.managers.user_manager import UserManager
+    """    from app.database.managers.user_manager import UserManager
     # Создаем экземпляр менеджера базы данных
     db = UserManager()
     logging.info(f"Запрос имени пользователя от пользователя: {current_user}")
     user=db.get_user_by_user_id(current_user)
     username=user.username
-    logging.info(f"Получено имя пользователя: {username}")
-    return jsonify(username), 200
+    logging.info(f"Получено имя пользователя: {username}")"""
+    return jsonify(current_user), 200
 
