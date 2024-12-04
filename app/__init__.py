@@ -55,7 +55,7 @@ def create_app():
     except Exception as e:
         logging.error(f"Ошибка при инициализации JWT: {e}", extra={'user_id': 'init'})
         raise
-
+    app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY') 
     # Инициализация OpenAI
     try:
         init_openai(app)
