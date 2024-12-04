@@ -31,9 +31,9 @@ def test_requests():
 
 
 # Эндпоинт для получения данных от первого бота
-@gateway_bp.route('/gateway/text', methods=['GET'])
+@gateway_bp.route('/gateway/text', methods=['POST'])
 def gateway():
-    test_requests()
+    return test_requests()
     """try:
         # Логируем сырые данные запроса
         logging.debug(f"Получен запрос с данными: {request.data.decode('utf-8')}")
