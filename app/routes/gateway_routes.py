@@ -33,8 +33,7 @@ def test_requests():
 # Эндпоинт для получения данных от первого бота
 @gateway_bp.route('/gateway/text', methods=['POST'])
 def gateway():
-    return test_requests()
-    """try:
+    try:
         # Логируем сырые данные запроса
         logging.debug(f"Получен запрос с данными: {request.data.decode('utf-8')}")
 
@@ -66,7 +65,7 @@ def gateway():
 
     except Exception as e:
         logging.error(f"Ошибка обработки запроса: {e}", exc_info=True)  # exc_info добавляет трейсбэк
-        return jsonify({"status": "error", "message": str(e)}), 500"""
+        return jsonify({"status": "error", "message": str(e)}), 500
 
     
 @gateway_bp.route('/gateway/file', methods=['POST'])
