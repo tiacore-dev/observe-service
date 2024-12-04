@@ -8,8 +8,8 @@ port = os.getenv('FLASK_PORT', '8000')  # Порт по умолчанию 8000
 
 # Настройки Gunicorn
 bind = f"0.0.0.0:{port}"
-workers = multiprocessing.cpu_count() * 2 + 1
-threads = 2  # Количество потоков на один воркер
+workers = 4
+threads = 4
 timeout = 600
 graceful_timeout = 30
 max_requests = 1000
