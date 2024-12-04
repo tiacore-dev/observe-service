@@ -5,13 +5,31 @@ import base64
 from io import BytesIO
 from app.openai_funcs.openai_funcs import transcribe_audio
 import json
+import requests
 
 gateway_bp = Blueprint('gateway', __name__)
+
+
+def test_requests():
+    url = "https://httpbin.org/get"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            logging.info("Библиотека requests работает корректно.")
+            logging.info("Ответ сервера:")
+            logging.info(response.json())
+        else:
+            logging.warning(f"Сервер вернул статус: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        logging.error("Ошибка при выполнении запроса:")
+        logging.error(e)
+
 
 # Эндпоинт для получения данных от первого бота
 @gateway_bp.route('/gateway/text', methods=['POST'])
 def gateway():
-    try:
+    test_requests()
+    """try:
         # Логируем сырые данные запроса
         logging.debug(f"Получен запрос с данными: {request.data.decode('utf-8')}")
 
@@ -43,7 +61,7 @@ def gateway():
 
     except Exception as e:
         logging.error(f"Ошибка обработки запроса: {e}", exc_info=True)  # exc_info добавляет трейсбэк
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500"""
 
     
 @gateway_bp.route('/gateway/file', methods=['POST'])
