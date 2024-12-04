@@ -125,4 +125,5 @@ def handle_document(message, decoded_file, file_name, db_u, db, s3_manager, buck
 def handle_voice(message, decoded_file, db_u, db):
     # Дополнительно: транскрибируем аудио
     text = transcribe_audio(decoded_file, 'ogg')
+    logging.info(text)
     add_text(message, text, db_u, db)
