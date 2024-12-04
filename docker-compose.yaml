@@ -10,11 +10,11 @@ services:
 
   web:
     build: .
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
+    environment:
+      - HTTP_PROXY=
+      - HTTPS_PROXY=
     depends_on:
       - alembic
     volumes:
