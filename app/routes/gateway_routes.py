@@ -31,7 +31,7 @@ def test_requests():
 
 
 # Эндпоинт для получения данных от первого бота
-@gateway_bp.route('/gateway/text', methods=['POST'])
+@gateway_bp.route('/gateway/text', methods=['GET'])
 def gateway():
     test_requests()
     """try:
