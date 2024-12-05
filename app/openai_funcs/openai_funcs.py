@@ -57,14 +57,15 @@ def chatgpt_analyze(prompt, messages):
                 f"Сообщение: {msg['text']}"
             )
             api_messages.append({"role": "user", "content": formatted_message})
-
+    logging.info("Перед вызовом OpenAI API")
+    logging.info(api_messages)
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
             model="gpt-4",  # Убедитесь, что это правильная модель
             messages=api_messages
         )
-
+        logging.info(f"Ответ OpenAI API: {response}")
         # Получение результата анализа
         analysis = response.choices[0].message.content
         tokens = response.usage.total_tokens

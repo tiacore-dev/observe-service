@@ -9,6 +9,8 @@ services:
 
 
   web:
+    tty: true
+    stdin_open: true
     build: .
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
