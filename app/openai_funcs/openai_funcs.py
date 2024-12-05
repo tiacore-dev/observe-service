@@ -14,21 +14,24 @@ class NamedBytesIO(BytesIO):
 
 # Транскрибация аудио
 def transcribe_audio(audio, file_format):
-    logging.info(f"Начало транскрибирования аудио-сообщения.")
     audio_file = NamedBytesIO(audio, f"audio.{file_format}")
     audio_file.seek(0)
     try:
-        response = openai.audio.transcriptions.create(
+        logging.info("Параметры вызова OpenAI API:")
+        logging.info({
+            "model": "whisper-1",
+            "file": audio_file,
+            "language": "ru"
+        })
+
+        response = openai.Audio.transcriptions.create(
             model="whisper-1",
-            file=audio_file,  # Передача объекта BytesIO
-            language="ru"  # Указание языка
+            file=audio_file,
+            language="ru"
         )
-        transcribed_text = response.text
-        logging.info(f"Транскрибация завершена.")
-        return transcribed_text
+        return response.text
     except Exception as e:
-        logging.error(f"Ошибка при транскрибации аудио: {e}")
-        return None
+        logging.error(f"Ошибка при вызове OpenAI API: {e}")
     finally:
         audio_file.close()
 
