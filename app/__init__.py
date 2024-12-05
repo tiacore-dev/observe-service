@@ -34,7 +34,12 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     # Установка секретного ключа для сессий
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') 
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+    os.environ["http_proxy"] = ""
+    os.environ["https_proxy"] = ""
+    os.environ["HTTP_PROXY"] = ""
+    os.environ["HTTPS_PROXY"] = "" 
 
     # Инициализация базы данных
     try:
