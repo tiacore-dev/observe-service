@@ -9,6 +9,7 @@ from app.routes import register_routes
 import os
 from dotenv import load_dotenv
 from app.openai_funcs import init_openai
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Настройка логирования
 logging.basicConfig(
@@ -36,11 +37,13 @@ def create_app():
     # Установка секретного ключа для сессий
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-    os.environ["http_proxy"] = ""
-    os.environ["https_proxy"] = ""
-    os.environ["HTTP_PROXY"] = ""
-    os.environ["HTTPS_PROXY"] = "" 
-
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,  # Используем 1 прокси для заголовка X-Forwarded-For
+        x_proto=1,  # Учитываем X-Forwarded-Proto (HTTP/HTTPS)
+        x_host=1,  # Учитываем X-Forwarded-Host
+        x_port=1   # Учитываем X-Forwarded-Port
+    )
     # Инициализация базы данных
     try:
         database_url = os.getenv('DATABASE_URL')

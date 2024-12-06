@@ -24,7 +24,7 @@ def transcribe_audio(audio, file_format):
             "language": "ru"
         })
 
-        response = openai.Audio.transcriptions.create(
+        response = openai.audio.transcriptions.create(
             model="whisper-1",
             file=audio_file,
             language="ru"
