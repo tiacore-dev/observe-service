@@ -31,5 +31,8 @@ def sync_chats_from_messages(bot):
                 logging.info(f"Чат {chat_id} с названием '{chat_name}' добавлен в таблицу chats.")
             except Exception as e:
                 logging.info(f"Не удалось добавить чат {chat_id}: {e}")
+        else:
+            logging.info(f"Чат {chat_id} уже существует в базе данных.")
+
 
 

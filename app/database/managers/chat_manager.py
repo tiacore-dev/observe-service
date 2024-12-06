@@ -8,14 +8,19 @@ class ChatManager:
     def add_chat(self, chat_id, chat_name=None):
         session = self.Session()
         try:
-            chat = Chat(chat_id=chat_id, chat_name=chat_name)
-            session.add(chat)
+            # Выполнение SQL с поддержкой UPSERT
+            session.execute("""
+                INSERT INTO chats (chat_id, chat_name)
+                VALUES (:chat_id, :chat_name)
+                ON CONFLICT (chat_id) DO NOTHING;
+            """, {"chat_id": chat_id, "chat_name": chat_name})
             session.commit()
         except Exception as e:
             session.rollback()
             raise e
         finally:
             session.close()
+
 
     def get_chat_by_id(self, chat_id):
         session = self.Session()
@@ -36,5 +41,12 @@ class ChatManager:
         except Exception as e:
             session.rollback()
             raise e
+        finally:
+            session.close()
+
+    def get_all_chats(self):
+        session = self.Session()
+        try:
+            return session.query(Chat).all()
         finally:
             session.close()

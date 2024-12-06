@@ -16,6 +16,7 @@ $(document).ready(function () {
                 loadPrompts().then(() => {
                     checkAutomaticPrompt(); // Проверяем автоматический промпт только после загрузки промптов
                 });
+                loadChats();
             },
             error: function () {
                 window.location.href = '/';
@@ -146,4 +147,24 @@ $(document).ready(function () {
             },
         });
     });
+
+    function loadChats() {
+        $.ajax({
+            url: '/api/chats',
+            type: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+            success: function (chats) {
+                const chatSelect = $('#chat_id');
+                chatSelect.empty(); // Очищаем выпадающий список
+                chatSelect.append('<option value="">-- Выберите чат --</option>'); // Опция по умолчанию
+    
+                chats.forEach(chat => {
+                    chatSelect.append(`<option value="${chat.chat_id}">${chat.chat_name}</option>`);
+                });
+            },
+            error: function () {
+                alert('Ошибка при загрузке чатов.');
+            },
+        });
+    }
 });
