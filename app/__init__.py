@@ -10,6 +10,8 @@ import os
 from dotenv import load_dotenv
 from app.openai_funcs import init_openai
 from werkzeug.middleware.proxy_fix import ProxyFix
+from app.utils.chat_sync import sync_chats_from_messages
+import telebot
 
 # Настройка логирования
 logging.basicConfig(
@@ -36,7 +38,10 @@ def create_app():
     app = Flask(__name__)
     # Установка секретного ключа для сессий
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-
+    # Инициализация бота
+    bot_token = os.getenv('TG_API_TOKEN')
+    bot = telebot.TeleBot(bot_token)
+    sync_chats_from_messages(bot)
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,  # Используем 1 прокси для заголовка X-Forwarded-For
