@@ -87,7 +87,5 @@ def create_app():
     except Exception as e:
         logging.error(f"Ошибка при регистрации маршрутов: {e}", extra={'user_id': 'init'})
         raise
-    import ssl
-    ssl._create_default_https_context = ssl._create_unverified_context
-
+ 
     return app
