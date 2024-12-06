@@ -5,7 +5,7 @@ services:
     volumes:
       - .:/app
     networks:
-      - observer_network
+      - observer${ENV}_network
 
 
   web:
@@ -41,5 +41,5 @@ services:
 
 
 networks:
-  observer_network:
+  observer${ENV}_network:
     external: true
