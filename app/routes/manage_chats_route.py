@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 
-from app.database.managers.prompt_manager import PromptManager  # Для работы с промптами
+  # Для работы с промптами
 
 manage_chats_bp = Blueprint('manage_chats', __name__)
 
@@ -8,6 +8,7 @@ manage_chats_bp = Blueprint('manage_chats', __name__)
 def manage_chats():
     from app.database.managers.chat_manager import ChatManager
     chat_manager = ChatManager()
+    from app.database.managers.prompt_manager import PromptManager
     prompt_manager = PromptManager()
     chats = chat_manager.get_all_chats()
     prompts = prompt_manager.get_prompts()  # Предполагаем, что есть метод для получения всех промптов
