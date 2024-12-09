@@ -47,10 +47,10 @@ $(document).ready(function () {
             type: 'GET',
             headers: { Authorization: `Bearer ${token}` },
             success: function (response) {
-                prompts = response.prompt_data; // Сохраняем все промпты
+                prompts = response.prompt_data;
                 const promptSelect = $('#prompt_name');
                 promptSelect.empty();
-                promptSelect.append('<option value="">-- Выберите промпт --</option>'); // Опция по умолчанию
+                promptSelect.append('<option value="">-- Выберите промпт --</option>');
 
                 prompts.forEach(prompt => {
                     promptSelect.append(`<option value="${prompt.prompt_id}">${prompt.prompt_name}</option>`);
@@ -67,17 +67,17 @@ $(document).ready(function () {
             url: '/get_automatic_prompt',
             type: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + token
+                Authorization: 'Bearer ' + token,
             },
             success: function (response) {
                 if (response.prompt_id) {
-                    defaultPromptId = response.prompt_id; // Сохраняем ID автоматического промпта
-                    $('#prompt_name').val(response.prompt_id); // Устанавливаем как выбранный
+                    defaultPromptId = response.prompt_id;
+                    $('#prompt_name').val(defaultPromptId); // Устанавливаем основной дефолтный промпт
                 }
             },
             error: function () {
                 console.log('Ошибка получения автоматического промпта.');
-            }
+            },
         });
     }
 
@@ -245,13 +245,14 @@ $(document).ready(function () {
 
                 chatSelect.on('change', function () {
                     const selectedChat = $(this).find('option:selected');
-                    const defaultPromptId = selectedChat.data('default-prompt-id');
+                    const chatPromptId = selectedChat.data('default-prompt-id');
 
-                    if (defaultPromptId) {
-                        $('#prompt_name').val(defaultPromptId);
+                    if (chatPromptId) {
+                        console.log(`Выбран чат с дефолтным промптом: ${chatPromptId}`);
+                        $('#prompt_name').val(chatPromptId);
                     } else {
-                        const generalDefault = prompts.find(prompt => prompt.use_automatic); // Находим общий дефолтный
-                        $('#prompt_name').val(generalDefault ? generalDefault.prompt_id : '');
+                        console.log('У выбранного чата нет дефолтного промпта. Возвращаемся к основному.');
+                        $('#prompt_name').val(defaultPromptId || '');
                     }
                 });
             },
