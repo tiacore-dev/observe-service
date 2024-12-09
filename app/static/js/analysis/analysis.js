@@ -27,14 +27,17 @@ $(document).ready(function () {
     // Настройка диапазона дат
     $('#start_date').daterangepicker({
         singleDatePicker: true,
-        locale: { format: 'YYYY-MM-DD' },
-        //locale: { format: 'DD-MM-YYYY' },
+        autoApply: true, // Автоматическое применение при выборе
+        locale: { format: 'DD-MM-YYYY' } // Формат отображения для пользователя
     });
+    
     $('#end_date').daterangepicker({
         singleDatePicker: true,
-        locale: { format: 'YYYY-MM-DD' },
-        //locale: { format: 'DD-MM-YYYY' },
+        autoApply: true, // Автоматическое применение при выборе
+        locale: { format: 'DD-MM-YYYY' } // Формат отображения для пользователя
     });
+    
+    
     
 
     function loadPrompts() {
@@ -85,18 +88,42 @@ $(document).ready(function () {
     const messagesPerPage = 10;
     
     function displayMessages(messages) {
+        // Проверка: messages должен быть массивом
+        if (!Array.isArray(messages)) {
+            console.error('Ошибка: Ожидается массив сообщений.');
+            return;
+        }
+    
         const start = (currentPage - 1) * messagesPerPage;
         const end = start + messagesPerPage;
         const paginatedMessages = messages.slice(start, end);
     
         const messagesList = $('#messagesList');
-        messagesList.empty();
+        messagesList.empty(); // Очищаем список перед добавлением новых сообщений
+    
         paginatedMessages.forEach(msg => {
-            messagesList.append(`<div class="message-item">${msg.content}</div>`);
+            // Проверяем наличие необходимых полей
+            const date = msg.timestamp ? moment(msg.timestamp).format('DD-MM-YYYY HH:mm:ss') : 'Не указано';
+            const userId = msg.user_id || 'Не указано';
+            const chatId = msg.chat_id || 'Не указано';
+            const text = msg.text || 'Пустое сообщение';
+            const s3Key = msg.s3_key || 'Не указано';
+    
+            // Добавляем сообщение в список
+            messagesList.append(`
+                <div class="message-item border rounded p-2 mb-2">
+                    <p><strong>Дата и время:</strong> ${date}</p>
+                    <p><strong>User ID:</strong> ${userId}</p>
+                    <p><strong>Chat ID:</strong> ${chatId}</p>
+                    <p><strong>Сообщение:</strong> ${text}</p>
+                    <p><strong>S3 Key:</strong> ${s3Key}</p>
+                </div>
+            `);
         });
     
         setupPagination(messages.length);
     }
+    
     
     function setupPagination(totalMessages) {
         const totalPages = Math.ceil(totalMessages / messagesPerPage);
@@ -119,8 +146,8 @@ $(document).ready(function () {
     }
     
     $('#filterButton').on('click', function () {
-        const start_date = $('#start_date').val();
-        const end_date = $('#end_date').val();
+        const start_date = moment($('#start_date').val(), 'DD-MM-YYYY').format('YYYY-MM-DD');
+        const end_date = moment($('#end_date').val(), 'DD-MM-YYYY').format('YYYY-MM-DD');
         const user_id = $('#user_id').val();
         const chat_id = $('#chat_id').val();
     
@@ -131,24 +158,31 @@ $(document).ready(function () {
             url,
             type: 'GET',
             headers: { Authorization: `Bearer ${token}` },
-            success: (data) => {
+            success: function (data) {
                 $('#loadingIcon').hide();
                 $('#messagesContainer').show();
-    
-                // Сохраняем все найденные сообщения в переменную
-                filteredMessages = data;
-                currentPage = 1; // Сбрасываем на первую страницу
-                displayMessages(filteredMessages); // Отображаем только текущую страницу
+        
+                // Проверяем, что 'data.messages' — массив
+                if (Array.isArray(data.messages)) {
+                    filteredMessages = data.messages; // Сохраняем массив сообщений
+                    currentPage = 1; // Сбрасываем на первую страницу
+                    displayMessages(filteredMessages); // Отображаем только текущую страницу
+                } else {
+                    alert('Ошибка: Ожидался массив сообщений.');
+                }
             },
-            error: () => {
+            error: function () {
                 $('#loadingIcon').hide();
                 alert('Ошибка при загрузке сообщений.');
             },
         });
+        
     });
     
     
     $('#submitButton').on('click', function () {
+        console.log(filteredMessages); // Убедитесь, что это массив и содержит все сообщения
+
         const prompt_id = $('#prompt_name').val();
     
         if (!prompt_id) {
@@ -175,13 +209,14 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             contentType: 'application/json',
             data: JSON.stringify({ prompt_id, filters, messages: filteredMessages }),
+
             success: function (response) {
                 $('#loadingIcon').hide();
                 if (response.analysis_id && response.result_text) {
                     // Отображаем результат на текущей странице
                     $('#analysisResult').show();
                     $('#analysisContent').html(`
-                        <p><strong>Сообщение:</strong> ${response.result_text}</p>
+                        <p><strong>Анализ:</strong> ${response.result_text}</p>
                         <p><strong>ID анализа:</strong> ${response.analysis_id}</p>
                     `);
                     alert('Анализ успешно создан!');

@@ -33,6 +33,8 @@ def create_analysis():
     messages = data.get('messages')
     filters = data.get('filters')
     current_user = get_jwt_identity()
+    logging.info(f"Тип данных сообщений: {type(messages)}")
+    logging.info(f"Количество сообщений: {len(messages)}")
 
     logging.info(f"Пользователь {current_user} начал создание анализа с prompt_id: {prompt_id}")
 

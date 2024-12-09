@@ -40,7 +40,7 @@ $(document).ready(function() {
 
         $.ajax({
             url: `/prompt/${prompt_id}/edit`,
-            type: 'PUT',
+            type: 'PATCH',
             headers: {
                 'Authorization': 'Bearer ' + token
             },
