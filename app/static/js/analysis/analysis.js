@@ -250,7 +250,7 @@ $(document).ready(function () {
                     if (defaultPromptId) {
                         $('#prompt_name').val(defaultPromptId);
                     } else {
-                        const generalDefault = prompts.find(prompt => prompt.is_default); // Находим общий дефолтный
+                        const generalDefault = prompts.find(prompt => prompt.use_automatic); // Находим общий дефолтный
                         $('#prompt_name').val(generalDefault ? generalDefault.prompt_id : '');
                     }
                 });
