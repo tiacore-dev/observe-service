@@ -1,18 +1,28 @@
 from flask import Blueprint, render_template, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
-  # Для работы с промптами
 
 manage_chats_bp = Blueprint('manage_chats', __name__)
 
 @manage_chats_bp.route('/manage_chats', methods=['GET'])
 def manage_chats():
+    return render_template('manage_chats.html')
+
+@manage_chats_bp.route('/api/chats', methods=['GET'])
+@jwt_required()
+def get_chats():
     from app.database.managers.chat_manager import ChatManager
     chat_manager = ChatManager()
+    chats = chat_manager.get_all_chats()
+    return jsonify([chat.to_dict() for chat in chats]), 200
+
+@manage_chats_bp.route('/api/prompts', methods=['GET'])
+@jwt_required()
+def get_prompts():
     from app.database.managers.prompt_manager import PromptManager
     prompt_manager = PromptManager()
-    chats = chat_manager.get_all_chats()
-    prompts = prompt_manager.get_prompts()  # Предполагаем, что есть метод для получения всех промптов
-    return render_template('manage_chats.html', chats=chats, prompts=prompts)
+    prompts = prompt_manager.get_all_prompts()
+    return jsonify([prompt.to_dict() for prompt in prompts]), 200
 
 @manage_chats_bp.route('/update_chat_prompt', methods=['POST'])
 def update_chat_prompt():

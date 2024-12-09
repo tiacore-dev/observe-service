@@ -148,3 +148,13 @@ class PromptManager:
         finally:
             session.close()
             logging.info(f"Сессия для установки флага 'use_automatic' для промпта ID: {prompt_id} закрыта.")
+
+
+    def get_all_prompts(self):
+        session = self.Session()
+        try:
+            logging.info(f"Получение промптов")
+            prompts = session.query(Prompt).all()
+            return prompts
+        finally:
+            session.close()
