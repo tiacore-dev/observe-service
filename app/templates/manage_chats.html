@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Chats | Tiacore{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <script src="/static/js/manage_chats.js"></script> 
+    <h1>Управление чатами</h1>
+    <div id="error" class="alert alert-danger" style="display: none;"></div>
+    <div id="content" style="display: none;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Чата</th>
+                    <th>Название Чата</th>
+                    <th>Дефолтный Промпт</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="chatTable"></tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

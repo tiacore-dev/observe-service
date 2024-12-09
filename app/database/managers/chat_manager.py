@@ -51,3 +51,19 @@ class ChatManager:
             return session.query(Chat).all()
         finally:
             session.close()
+
+    def update_default_prompt(self, chat_id, prompt_id):
+        """Обновление дефолтного промпта для чата"""
+        session = self.Session()
+        try:
+            chat = session.query(Chat).filter_by(chat_id=chat_id).first()
+            if chat:
+                chat.default_prompt_id = prompt_id
+                session.commit()
+            else:
+                raise ValueError("Chat not found")
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
