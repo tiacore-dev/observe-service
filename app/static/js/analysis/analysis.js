@@ -2,6 +2,7 @@ $(document).ready(function () {
     const token = localStorage.getItem('access_token');
     let filteredMessages = []; // Хранение сообщений после фильтрации
     let defaultPromptId = null; // Хранение ID автоматического промпта
+    let prompts = []; // Список всех промптов
 
     if (!token) {
         window.location.href = '/';
@@ -46,18 +47,14 @@ $(document).ready(function () {
             type: 'GET',
             headers: { Authorization: `Bearer ${token}` },
             success: function (response) {
+                prompts = response.prompt_data; // Сохраняем все промпты
                 const promptSelect = $('#prompt_name');
-                promptSelect.empty(); // Очищаем список перед добавлением новых данных
-                promptSelect.append('<option value="">-- Выберите промпт --</option>'); // Добавляем опцию по умолчанию
+                promptSelect.empty();
+                promptSelect.append('<option value="">-- Выберите промпт --</option>'); // Опция по умолчанию
 
-                response.prompt_data.forEach(prompt => {
+                prompts.forEach(prompt => {
                     promptSelect.append(`<option value="${prompt.prompt_id}">${prompt.prompt_name}</option>`);
                 });
-
-                // Если автоматический промпт уже найден, выбираем его
-                if (defaultPromptId) {
-                    promptSelect.val(defaultPromptId);
-                }
             },
             error: function () {
                 alert('Ошибка при загрузке промптов.');
@@ -239,11 +236,23 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             success: function (chats) {
                 const chatSelect = $('#chat_id');
-                chatSelect.empty(); // Очищаем выпадающий список
-                chatSelect.append('<option value="">-- Выберите чат --</option>'); // Опция по умолчанию
-    
+                chatSelect.empty();
+                chatSelect.append('<option value="">-- Выберите чат --</option>');
+
                 chats.forEach(chat => {
-                    chatSelect.append(`<option value="${chat.chat_id}">${chat.chat_name}</option>`);
+                    chatSelect.append(`<option value="${chat.chat_id}" data-default-prompt-id="${chat.default_prompt_id || ''}">${chat.chat_name}</option>`);
+                });
+
+                chatSelect.on('change', function () {
+                    const selectedChat = $(this).find('option:selected');
+                    const defaultPromptId = selectedChat.data('default-prompt-id');
+
+                    if (defaultPromptId) {
+                        $('#prompt_name').val(defaultPromptId);
+                    } else {
+                        const generalDefault = prompts.find(prompt => prompt.is_default); // Находим общий дефолтный
+                        $('#prompt_name').val(generalDefault ? generalDefault.prompt_id : '');
+                    }
                 });
             },
             error: function () {

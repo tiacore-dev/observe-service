@@ -148,17 +148,3 @@ def get_user_prompts():
         logging.error(f"Ошибка при получении промптов: {str(e)}")
         return jsonify({'error': 'Failed to fetch prompts'}), 500
 
-
-@analysis_bp.route('/api/chats', methods=['GET'])
-@jwt_required()
-def get_chats():
-    """
-    Возвращает список доступных чатов
-    """
-    from app.database.managers.chat_manager import ChatManager
-    chat_manager = ChatManager()
-    try:
-        chats = chat_manager.get_all_chats()
-        return jsonify([{"chat_id": chat.chat_id, "chat_name": chat.chat_name or "Без названия"} for chat in chats]), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to fetch chats'}), 500
