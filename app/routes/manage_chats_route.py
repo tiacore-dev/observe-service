@@ -43,6 +43,7 @@ def get_prompts():
         return jsonify({'error': 'Ошибка при получении промптов'}), 500
 
 @manage_chats_bp.route('/update_chat_prompt', methods=['POST'])
+@jwt_required()
 def update_chat_prompt():
     from app.database.managers.chat_manager import ChatManager
     data = request.json
