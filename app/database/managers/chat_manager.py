@@ -1,5 +1,6 @@
 from app.database.models.chat import Chat
 from app.database.db_globals import Session
+from sqlalchemy import text
 
 class ChatManager:
     def __init__(self):
@@ -9,11 +10,11 @@ class ChatManager:
         session = self.Session()
         try:
             # Выполнение SQL с поддержкой UPSERT
-            session.execute("""
+            session.execute(text("""
                 INSERT INTO chats (chat_id, chat_name)
                 VALUES (:chat_id, :chat_name)
                 ON CONFLICT (chat_id) DO NOTHING;
-            """, {"chat_id": chat_id, "chat_name": chat_name})
+            """), {"chat_id": chat_id, "chat_name": chat_name})
             session.commit()
         except Exception as e:
             session.rollback()
