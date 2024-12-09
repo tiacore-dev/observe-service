@@ -40,23 +40,24 @@ def create_analysis():
         logging.warning("Ошибка: отсутствует prompt_id или сообщения")
         return jsonify({'error': 'Prompt ID and messages are required'}), 400
 
-    prompt = get_prompt(prompt_id)
-    logging.info(f"Промпт успешно загружен для prompt_id: {prompt_id}")
-
     try:
-        logging.info("Запуск анализа сообщений через ChatGPT")
-        result_text, tokens = chatgpt_analyze(prompt, messages)
-        logging.info("Анализ успешно завершен")
+        # Логика анализа
+        result_text, tokens = chatgpt_analyze(prompt_id, messages)
 
         from app.database.managers.analysis_manager import AnalysisManager
         db_a = AnalysisManager()
         analysis_id = db_a.save_analysis_result(prompt_id, result_text, filters, tokens)
         logging.info(f"Анализ успешно сохранен с analysis_id: {analysis_id}")
 
-        return jsonify({'message': 'Analysis created successfully', 'analysis_id': analysis_id}), 201
+        return jsonify({
+            'message': 'Анализ успешно создан!',
+            'analysis_id': analysis_id,
+            'result_text': result_text
+        }), 201
     except Exception as e:
         logging.error(f"Ошибка при создании анализа: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
 
 # Получение списка анализов
 @analysis_bp.route('/analysis/all', methods=['GET'])
@@ -101,6 +102,8 @@ def get_messages():
     end_date = request.args.get('end_date')
     user_id = request.args.get('user_id')
     chat_id = request.args.get('chat_id')
+    page = int(request.args.get('page', 1))
+    page_size = int(request.args.get('page_size', 10))
 
     logging.info(f"Запрос сообщений с фильтрацией: start_date={start_date}, end_date={end_date}, user_id={user_id}, chat_id={chat_id}")
 
@@ -108,11 +111,20 @@ def get_messages():
     manager = MessageManager()
     try:
         messages = manager.get_filtered_messages(start_date=start_date, end_date=end_date, user_id=user_id, chat_id=chat_id)
-        logging.info(f"Найдено {len(messages)} сообщений по указанным фильтрам")
-        return jsonify([msg.to_dict() for msg in messages]), 200
+        total_messages = len(messages)
+        paginated_messages = messages[(page - 1) * page_size:page * page_size]
+
+        logging.info(f"Найдено {len(messages)} сообщений, возвращено {len(paginated_messages)} сообщений на странице {page}")
+        return jsonify({
+            'total': total_messages,
+            'page': page,
+            'page_size': page_size,
+            'messages': [msg.to_dict() for msg in paginated_messages],
+        }), 200
     except Exception as e:
         logging.error(f"Ошибка при фильтрации сообщений: {str(e)}")
         return jsonify({'error': 'Failed to fetch messages'}), 500
+
 
 # Получение пользовательских промптов
 @analysis_bp.route('/user_prompts', methods=['GET'])

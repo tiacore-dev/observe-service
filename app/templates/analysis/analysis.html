@@ -14,10 +14,16 @@
 
     <!-- Фильтры -->
     <div class="row mb-3">
-        <div class="col-lg-4 col-md-6">
-            <label for="date_range" class="form-label">Диапазон дат:</label>
-            <input type="text" id="date_range" class="form-control" placeholder="Выберите даты">
-        </div>
+        <div class="row mb-3">
+            <div class="col-lg-4 col-md-6">
+                <label for="start_date" class="form-label">Дата начала:</label>
+                <input type="text" id="start_date" class="form-control" placeholder="Выберите дату начала">
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <label for="end_date" class="form-label">Дата окончания:</label>
+                <input type="text" id="end_date" class="form-control" placeholder="Выберите дату окончания">
+            </div>
+        </div>        
         <div class="col-lg-4 col-md-6">
             <label for="user_id" class="form-label">ID пользователя:</label>
             <input type="text" id="user_id" class="form-control" placeholder="Введите ID">
@@ -36,6 +42,14 @@
     <div id="messageSummary" class="alert alert-info p-2" style="display: none;">
         Найдено сообщений: <strong id="messageCount">0</strong>
     </div>
+    <div id="messagesContainer" style="display: none;">
+        <h5>Сообщения:</h5>
+        <div id="messagesList"></div>
+        <nav>
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
+    </div>
+    
 
     <!-- Выбор промпта -->
     <label for="prompt_name" class="form-label">Выберите промпт:</label>
@@ -50,7 +64,14 @@
             <span class="visually-hidden">Загрузка...</span>
         </div>
     </div>
+    <div id="analysisResult" class="mt-4" style="display: none;">
+        <h4>Результат анализа</h4>
+        <div id="analysisContent" class="p-3 border rounded bg-light"></div>
+    </div>
+    
 </div>
+
+
 
 <style>
     .daterangepicker {

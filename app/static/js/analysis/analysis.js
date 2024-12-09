@@ -25,10 +25,17 @@ $(document).ready(function () {
     }
 
     // Настройка диапазона дат
-    $('#date_range').daterangepicker({
-        locale: { format: 'YYYY-MM-DD', separator: ' до ' },
-        opens: 'left',
+    $('#start_date').daterangepicker({
+        singleDatePicker: true,
+        //locale: { format: 'YYYY-MM-DD' },
+        locale: { format: 'DD-MM-YYYY' },
     });
+    $('#end_date').daterangepicker({
+        singleDatePicker: true,
+        //locale: { format: 'YYYY-MM-DD' },
+        locale: { format: 'DD-MM-YYYY' },
+    });
+    
 
     function loadPrompts() {
         return $.ajax({
@@ -74,18 +81,51 @@ $(document).ready(function () {
         });
     }
 
-    // Фильтрация сообщений
+    let currentPage = 1;
+    const messagesPerPage = 10;
+    
+    function displayMessages(messages) {
+        const start = (currentPage - 1) * messagesPerPage;
+        const end = start + messagesPerPage;
+        const paginatedMessages = messages.slice(start, end);
+    
+        const messagesList = $('#messagesList');
+        messagesList.empty();
+        paginatedMessages.forEach(msg => {
+            messagesList.append(`<div class="message-item">${msg.content}</div>`);
+        });
+    
+        setupPagination(messages.length);
+    }
+    
+    function setupPagination(totalMessages) {
+        const totalPages = Math.ceil(totalMessages / messagesPerPage);
+        const pagination = $('#pagination');
+        pagination.empty();
+    
+        for (let i = 1; i <= totalPages; i++) {
+            pagination.append(`
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#">${i}</a>
+                </li>
+            `);
+        }
+    
+        $('.page-item a').on('click', function (e) {
+            e.preventDefault();
+            currentPage = parseInt($(this).text());
+            displayMessages(filteredMessages);
+        });
+    }
+    
     $('#filterButton').on('click', function () {
-        const [start_date, end_date] = $('#date_range').val().split(' до ');
+        const start_date = $('#start_date').val();
+        const end_date = $('#end_date').val();
         const user_id = $('#user_id').val();
         const chat_id = $('#chat_id').val();
-
-        let url = '/api/messages?';
-        if (start_date) url += `start_date=${start_date}&`;
-        if (end_date) url += `end_date=${end_date}&`;
-        if (user_id) url += `user_id=${user_id}&`;
-        if (chat_id) url += `chat_id=${chat_id}`;
-
+    
+        let url = `/api/messages?start_date=${start_date || ''}&end_date=${end_date || ''}&user_id=${user_id || ''}&chat_id=${chat_id || ''}`;
+    
         $('#loadingIcon').show();
         $.ajax({
             url,
@@ -93,8 +133,12 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             success: (data) => {
                 $('#loadingIcon').hide();
-                $('#messageSummary').show().find('#messageCount').text(data.length);
-                filteredMessages = data; // Сохраняем отфильтрованные сообщения
+                $('#messagesContainer').show();
+    
+                // Сохраняем все найденные сообщения в переменную
+                filteredMessages = data;
+                currentPage = 1; // Сбрасываем на первую страницу
+                displayMessages(filteredMessages); // Отображаем только текущую страницу
             },
             error: () => {
                 $('#loadingIcon').hide();
@@ -102,33 +146,28 @@ $(document).ready(function () {
             },
         });
     });
-
-    // Запуск анализа
+    
+    
     $('#submitButton').on('click', function () {
-        const dateRange = $('#date_range').val().split(' до ');
-        const start_date = dateRange[0];
-        const end_date = dateRange[1];
-        const user_id = $('#user_id').val();
-        const chat_id = $('#chat_id').val();
         const prompt_id = $('#prompt_name').val();
-
+    
         if (!prompt_id) {
             alert('Пожалуйста, выберите промпт.');
             return;
         }
-
+    
         if (filteredMessages.length === 0) {
             alert('Сначала выполните фильтрацию сообщений.');
             return;
         }
-
+    
         const filters = {
-            start_date: start_date || null,
-            end_date: end_date || null,
-            user_id: user_id || null,
-            chat_id: chat_id || null,
+            start_date: $('#start_date').val() || null,
+            end_date: $('#end_date').val() || null,
+            user_id: $('#user_id').val() || null,
+            chat_id: $('#chat_id').val() || null,
         };
-
+    
         $('#loadingIcon').show();
         $.ajax({
             url: '/analysis/create',
@@ -136,10 +175,19 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             contentType: 'application/json',
             data: JSON.stringify({ prompt_id, filters, messages: filteredMessages }),
-            success: function () {
+            success: function (response) {
                 $('#loadingIcon').hide();
-                alert('Анализ успешно создан!');
-                window.location.href = '/analysis_result';
+                if (response.analysis_id && response.result_text) {
+                    // Отображаем результат на текущей странице
+                    $('#analysisResult').show();
+                    $('#analysisContent').html(`
+                        <p><strong>Сообщение:</strong> ${response.result_text}</p>
+                        <p><strong>ID анализа:</strong> ${response.analysis_id}</p>
+                    `);
+                    alert('Анализ успешно создан!');
+                } else {
+                    alert('Анализ создан, но результат пуст.');
+                }
             },
             error: function () {
                 $('#loadingIcon').hide();
@@ -147,7 +195,8 @@ $(document).ready(function () {
             },
         });
     });
-
+    
+    
     function loadChats() {
         $.ajax({
             url: '/api/chats',
