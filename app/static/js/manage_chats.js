@@ -1,7 +1,9 @@
 $(document).ready(function () {
     const token = localStorage.getItem('access_token');
+    let promptsLoaded = false;
+    let chatsLoaded = false;
+    let chatsData = [];
 
-    // Если токен отсутствует, перенаправляем на домашнюю страницу
     if (!token) {
         console.warn('JWT токен отсутствует. Перенаправление на главную страницу.');
         window.location.href = '/';
@@ -41,7 +43,9 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             success: function (chats) {
                 console.log('Список чатов успешно загружен:', chats);
-                renderChats(chats);
+                chatsData = chats; // Сохраняем данные чатов
+                chatsLoaded = true;
+                checkAndRender();
             },
             error: function () {
                 showError('Ошибка загрузки чатов.');
@@ -58,11 +62,19 @@ $(document).ready(function () {
             success: function (prompts) {
                 console.log('Список промптов успешно загружен:', prompts);
                 window.prompts = prompts; // Сохраняем промпты в глобальную переменную
+                promptsLoaded = true;
+                checkAndRender();
             },
             error: function () {
                 showError('Ошибка загрузки промптов.');
             },
         });
+    }
+
+    function checkAndRender() {
+        if (promptsLoaded && chatsLoaded) {
+            renderChats(chatsData);
+        }
     }
 
     function renderChats(chats) {
