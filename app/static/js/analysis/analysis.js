@@ -27,13 +27,13 @@ $(document).ready(function () {
     // Настройка диапазона дат
     $('#start_date').daterangepicker({
         singleDatePicker: true,
-        //locale: { format: 'YYYY-MM-DD' },
-        locale: { format: 'DD-MM-YYYY' },
+        locale: { format: 'YYYY-MM-DD' },
+        //locale: { format: 'DD-MM-YYYY' },
     });
     $('#end_date').daterangepicker({
         singleDatePicker: true,
-        //locale: { format: 'YYYY-MM-DD' },
-        locale: { format: 'DD-MM-YYYY' },
+        locale: { format: 'YYYY-MM-DD' },
+        //locale: { format: 'DD-MM-YYYY' },
     });
     
 
