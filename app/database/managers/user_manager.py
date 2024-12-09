@@ -1,6 +1,7 @@
 from sqlalchemy import exists
 from app.database.models.user import User  
 from app.database.db_globals import Session
+import logging
 
 class UserManager:
     def __init__(self):
@@ -49,4 +50,32 @@ class UserManager:
                 return False  # Если пользователь не найден, возвращаем False
         finally:
             # Закрываем сессию в блоке finally, чтобы гарантировать закрытие независимо от результата
+            session.close()
+
+    def get_users(self):
+        session = self.Session()
+        try:
+            # Ищем пользователя по user_id
+            users = session.query(User).all()
+            return users
+        except Exception as e:
+            logging.error(f"Ошибка при получении пользователей: {e}")
+            raise e
+        finally:
+            # Закрываем сессию в блоке finally, чтобы гарантировать закрытие независимо от результата
+            session.close()
+
+    def update_username(self, user_id, username):
+        session = self.Session()
+        try:
+            user_in_db = session.query(User).filter_by(user_id=user_id).first()
+            if user_in_db:
+                user_in_db.username = username
+                session.commit()
+                logging.info(f"Обновлено имя пользователя {user_id}: {username}")
+        except Exception as e:
+            logging.error(f"Ошибка при редактировании имени пользователя: {e}")
+            session.rollback()
+            raise e
+        finally:
             session.close()

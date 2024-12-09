@@ -1,8 +1,6 @@
 import logging
 
 
-
-
 def sync_chats_from_messages(bot):
     """
     Находит уникальные chat_id в таблице messages и добавляет их в таблицу chats,
@@ -35,4 +33,33 @@ def sync_chats_from_messages(bot):
             logging.info(f"Чат {chat_id} уже существует в базе данных.")
 
 
+
+
+def update_usernames(bot):
+    """
+    Обновляет поле username в таблице users, если оно изменилось,
+    используя Telegram API для получения имени и фамилии пользователей.
+    """
+    from app.database.managers.user_manager import UserManager
+
+    # Менеджер пользователей
+    db = UserManager()
+    users = db.get_users()
+
+    for user in users:
+        try:
+            # Получаем информацию о пользователе через Telegram API
+            user_info = bot.get_chat(user.user_id)
+            username = f"{user_info.first_name}"
+            if user_info.last_name:
+                username += f" {user_info.last_name}"
+            
+            # Проверяем, нужно ли обновить имя
+            if user.username != username:
+                db.update_username(user.user_id, username)
+                logging.info(f"Имя пользователя {user.user_id} обновлено: '{user.username}' -> '{username}'.")
+            else:
+                logging.info(f"Имя пользователя {user.user_id} актуально: '{user.username}'.")
+        except Exception as e:
+            logging.warning(f"Не удалось обновить пользователя {user.user_id}: {e}")
 

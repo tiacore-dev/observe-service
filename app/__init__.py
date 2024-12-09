@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 from app.openai_funcs import init_openai
 from werkzeug.middleware.proxy_fix import ProxyFix
-from app.utils.chat_sync import sync_chats_from_messages
+from app.utils.tg_db import sync_chats_from_messages, update_usernames
 import telebot
 
 # Настройка логирования
@@ -60,6 +60,7 @@ def create_app():
     bot_token = os.getenv('TG_API_TOKEN')
     bot = telebot.TeleBot(bot_token)
     sync_chats_from_messages(bot)
+    update_usernames(bot)
 
     # Инициализация JWT
     try:
