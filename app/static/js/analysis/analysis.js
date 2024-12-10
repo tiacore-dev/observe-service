@@ -234,31 +234,49 @@ $(document).ready(function () {
     });
 
     $('#submitButton').on('click', function () {
+        console.log(filteredMessages); // Убедитесь, что это массив и содержит все сообщения
+    
         const prompt_id = $('#prompt_name').val();
-
+    
         if (!prompt_id) {
             alert('Пожалуйста, выберите промпт.');
             return;
         }
-
+    
         if (filteredMessages.length === 0) {
             alert('Сначала выполните фильтрацию сообщений.');
             return;
         }
-
-        const filters = getFilters();
-
+    
+        const filters = {
+            start_date: $('#start_date').val() || null,
+            end_date: $('#end_date').val() || null,
+            user_id: $('#user_id').val() || null,
+            chat_id: $('#chat_id').val() || null,
+        };
+    
         $('#loadingIcon').show();
         $.ajax({
             url: '/analysis/create',
             type: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             contentType: 'application/json',
-            data: JSON.stringify({ prompt_id, filters, messages: filteredMessages}),
-            success: function () {
+            data: JSON.stringify({ prompt_id, filters, messages: filteredMessages }),
+            success: function (response) {
                 $('#loadingIcon').hide();
-                alert('Анализ успешно создан!');
-                window.location.href = '/analysis_result';
+                if (response.analysis_id && response.result_text) {
+                    // Отображаем результат на текущей странице
+                    $('#analysisResult').show();
+                    $('#analysisContent').html(`
+                        <p><strong>Анализ:</strong> ${response.result_text}</p>
+                        <p><strong>ID анализа:</strong> ${response.analysis_id}</p>
+                    `);
+                    alert('Анализ успешно создан!');
+                } else {
+                    alert('Анализ создан, но результат пуст.');
+                }
             },
             error: function () {
                 $('#loadingIcon').hide();
@@ -266,5 +284,6 @@ $(document).ready(function () {
             },
         });
     });
+    
 
 });
