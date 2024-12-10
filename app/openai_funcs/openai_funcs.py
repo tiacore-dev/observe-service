@@ -74,7 +74,7 @@ def chatgpt_analyze(prompt, messages):
                 logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
 
     logging.info("Перед вызовом OpenAI API")
-    #logging.info(api_messages)
+    logging.info(api_messages)
 
     try:
         # Вызов OpenAI API
