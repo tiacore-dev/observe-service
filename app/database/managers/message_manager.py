@@ -55,4 +55,29 @@ class MessageManager:
         return query.all()
 
 
-    
+    def get_paginated_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None, limit=10, offset=0):
+        session = self.Session()
+        query = session.query(Message)
+
+        # Фильтры
+        if start_date:
+            start_date_parsed = datetime.strptime(start_date, "%Y-%m-%d")
+            query = query.filter(Message.timestamp >= start_date_parsed)
+
+        if end_date:
+            end_date_parsed = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
+            query = query.filter(Message.timestamp < end_date_parsed)
+
+        if user_id:
+            query = query.filter(Message.user_id == int(user_id))
+
+        if chat_id:
+            query = query.filter(Message.chat_id == int(chat_id))
+
+        # Общее количество сообщений (для пагинации)
+        total_count = query.count()
+
+        # Применяем limit и offset
+        query = query.order_by(Message.timestamp.desc()).limit(limit).offset(offset)
+
+        return query.all(), total_count

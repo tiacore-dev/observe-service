@@ -9,9 +9,7 @@ account_bp = Blueprint('account', __name__)
 def health_check():
     return "OK", 200
 
-@account_bp.route('/api-keys', methods=['GET'])
-def api_key():
-    return render_template('api_keys.html')
+
 
 @account_bp.route('/account', methods=['GET'])
 def account():

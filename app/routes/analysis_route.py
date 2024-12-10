@@ -96,36 +96,7 @@ def get_analysis_detail(analysis_id):
         logging.error(f"Ошибка при получении деталей анализа: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Получение сообщений с фильтрацией
-@analysis_bp.route('/api/messages', methods=['GET'])
-@jwt_required()
-def get_messages():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    user_id = request.args.get('user_id')
-    chat_id = request.args.get('chat_id')
-    page = int(request.args.get('page', 1))
-    page_size = int(request.args.get('page_size', 10))
 
-    logging.info(f"Запрос сообщений с фильтрацией: start_date={start_date}, end_date={end_date}, user_id={user_id}, chat_id={chat_id}")
-
-    from app.database.managers.message_manager import MessageManager
-    manager = MessageManager()
-    try:
-        messages = manager.get_filtered_messages(start_date=start_date, end_date=end_date, user_id=user_id, chat_id=chat_id)
-        total_messages = len(messages)
-        paginated_messages = messages[(page - 1) * page_size:page * page_size]
-
-        logging.info(f"Найдено {len(messages)} сообщений, возвращено {len(paginated_messages)} сообщений на странице {page}")
-        return jsonify({
-            'total': total_messages,
-            'page': page,
-            'page_size': page_size,
-            'messages': [msg.to_dict() for msg in paginated_messages],
-        }), 200
-    except Exception as e:
-        logging.error(f"Ошибка при фильтрации сообщений: {str(e)}")
-        return jsonify({'error': 'Failed to fetch messages'}), 500
 
 
 # Получение пользовательских промптов
@@ -148,17 +119,4 @@ def get_user_prompts():
         logging.error(f"Ошибка при получении промптов: {str(e)}")
         return jsonify({'error': 'Failed to fetch prompts'}), 500
 
-@analysis_bp.route('/api/users', methods=['GET'])
-@jwt_required()
-def get_users():
-    """
-    Возвращает список пользователей из базы данных.
-    """
-    from app.database.managers.user_manager import UserManager
-    user_manager = UserManager()
-    try:
-        users = user_manager.get_users()
-        return jsonify([user.to_dict() for user in users]), 200
-    except Exception as e:
-        logging.error(f"Ошибка при получении списка пользователей: {e}")
-        return jsonify({"error": "Ошибка при получении списка пользователей"}), 500
+

@@ -12,35 +12,6 @@ def manage_chats():
     logging.info("Страница управления чатами запрошена")
     return render_template('manage_chats.html')
 
-@manage_chats_bp.route('/api/chats', methods=['GET'])
-@jwt_required()
-def get_chats():
-    from app.database.managers.chat_manager import ChatManager
-    chat_manager = ChatManager()
-    current_user = get_jwt_identity()
-    logging.info(f"Пользователь {current_user} запросил список чатов")
-    try:
-        chats = chat_manager.get_all_chats()
-        logging.info(f"Найдено {len(chats)} чатов")
-        return jsonify([chat.to_dict() for chat in chats]), 200
-    except Exception as e:
-        logging.error(f"Ошибка при получении списка чатов: {str(e)}")
-        return jsonify({'error': 'Ошибка при получении чатов'}), 500
-
-@manage_chats_bp.route('/api/prompts', methods=['GET'])
-@jwt_required()
-def get_prompts():
-    from app.database.managers.prompt_manager import PromptManager
-    prompt_manager = PromptManager()
-    current_user = get_jwt_identity()
-    logging.info(f"Пользователь {current_user} запросил список промптов")
-    try:
-        prompts = prompt_manager.get_all_prompts()
-        logging.info(f"Найдено {len(prompts)} промптов")
-        return jsonify([prompt.to_dict() for prompt in prompts]), 200
-    except Exception as e:
-        logging.error(f"Ошибка при получении списка промптов: {str(e)}")
-        return jsonify({'error': 'Ошибка при получении промптов'}), 500
 
 @manage_chats_bp.route('/update_chat_prompt', methods=['POST'])
 @jwt_required()

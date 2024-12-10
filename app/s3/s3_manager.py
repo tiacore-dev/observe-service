@@ -110,3 +110,15 @@ class S3Manager:
         except ClientError as e:
             logging.error(f"Ошибка при получении файла '{object_name}': {e}")
             return None
+        
+    def generate_presigned_url(self, bucket_name, object_name, expiration=3600):
+        logging.info(f"Генерация временного URL для файла '{object_name}' в bucket '{bucket_name}', срок действия {expiration} секунд.", extra={'user_id': 's3'})
+        try:
+            response = self.s3.generate_presigned_url('get_object',
+                                                      Params={'Bucket': bucket_name, 'Key': object_name},
+                                                      ExpiresIn=expiration)
+            logging.info(f"URL успешно сгенерирован для файла '{object_name}'.", extra={'user_id': 's3'})
+            return response
+        except ClientError as e:
+            logging.error(f"Ошибка при генерации URL для файла '{object_name}': {e}", extra={'user_id': 's3'})
+            return None
