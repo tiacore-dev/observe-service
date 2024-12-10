@@ -84,7 +84,7 @@ def chatgpt_analyze(prompt, messages):
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
-            model="gpt-4",  # Убедитесь, что используете правильную модель
+            model="gpt-4o",  # Убедитесь, что используете правильную модель
             #messages=api_messages,
             messages=messages
             #files=files if files else None  # Отправляем файлы только если они есть
