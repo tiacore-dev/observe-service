@@ -38,16 +38,22 @@ def transcribe_audio(audio, file_format):
 
 def chatgpt_analyze(prompt, messages):
     """
-    Запускает анализ набора сообщений через OpenAI API.
+    Запускает анализ набора сообщений через OpenAI API с возможностью отправки изображений.
 
     :param prompt: Текст системного промпта.
-    :param messages: Список сообщений (JSON).
+    :param messages: Список сообщений (JSON), включая ссылки на изображения.
     :return: Результат анализа и количество использованных токенов.
     """
     logging.info(f"Начало анализа набора сообщений.")
 
+    from app.s3 import get_s3_manager, get_bucket_name
+    s3_manager = get_s3_manager()
+    bucket_name = get_bucket_name()
+
     # Форматируем сообщения для OpenAI API
     api_messages = [{"role": "system", "content": prompt}]
+    files = []  # Список файлов для отправки в OpenAI
+
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
             formatted_message = (
@@ -57,20 +63,33 @@ def chatgpt_analyze(prompt, messages):
                 f"Сообщение: {msg['text']}"
             )
             api_messages.append({"role": "user", "content": formatted_message})
+
+        # Проверяем наличие s3_key и скачиваем файл
+        if "s3_key" in msg and msg["s3_key"]:
+            try:
+                logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
+                file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
+                files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
+            except Exception as e:
+                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
+
     logging.info("Перед вызовом OpenAI API")
-    logging.info(api_messages)
+    #logging.info(api_messages)
+
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
-            model="gpt-4",  # Убедитесь, что это правильная модель
-            messages=api_messages
+            model="gpt-4",  # Убедитесь, что используете правильную модель
+            messages=api_messages,
+            #files=files if files else None  # Отправляем файлы только если они есть
         )
         logging.info(f"Ответ OpenAI API: {response}")
+
         # Получение результата анализа
         analysis = response.choices[0].message.content
         tokens = response.usage.total_tokens
 
-        logging.info("Анализ текста завершен.", extra={'user_id': 'openai'})
+        logging.info("Анализ текста завершен.")
         return analysis, tokens
 
     except Exception as e:
