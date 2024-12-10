@@ -241,7 +241,7 @@ $(document).ready(function () {
             return;
         }
 
-        if (allMessages.length === 0) {
+        if (filteredMessages.length === 0) {
             alert('Сначала выполните фильтрацию сообщений.');
             return;
         }
