@@ -1,7 +1,7 @@
 import openai
 from io import BytesIO
 import logging
-
+import json
 
 
 
@@ -47,40 +47,46 @@ def chatgpt_analyze(prompt, messages):
     logging.info(f"Начало анализа набора сообщений.")
 
     from app.s3 import get_s3_manager, get_bucket_name
-    s3_manager = get_s3_manager()
-    bucket_name = get_bucket_name()
+    #s3_manager = get_s3_manager()
+    #bucket_name = get_bucket_name()
 
     # Форматируем сообщения для OpenAI API
-    api_messages = [{"role": "system", "content": prompt}]
-    files = []  # Список файлов для отправки в OpenAI
-
+    #api_messages = [{"role": "system", "content": prompt}]
+    #files = []  # Список файлов для отправки в OpenAI
+    api_messages = []
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
-            formatted_message = (
-                f"Пользователь: {msg['user_id']}, "
-                f"Чат: {msg['chat_id']}, "
-                f"Дата: {msg['timestamp']}, "
-                f"Сообщение: {msg['text']}"
-            )
-            api_messages.append({"role": "user", "content": formatted_message})
-
-        # Проверяем наличие s3_key и скачиваем файл
+                message_data = {
+                    "user_id": msg.get("user_id", "Неизвестно"),
+                    "chat_id": msg.get("chat_id", "Неизвестно"),
+                    "timestamp": msg.get("timestamp", "Неизвестно"),
+                    "text": msg.get("text", "Пустое сообщение"),
+                }
+                # Добавляем сообщение как JSON
+                api_messages.append(
+                    #"role": "user",
+                    #"content": 
+                    json.dumps(message_data, ensure_ascii=False)
+                )
+    
+        """# Проверяем наличие s3_key и скачиваем файл
         if "s3_key" in msg and msg["s3_key"]:
             try:
                 logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
                 file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
                 files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
             except Exception as e:
-                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
+                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")"""
 
     logging.info("Перед вызовом OpenAI API")
     logging.info(api_messages)
-
+    messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
             model="gpt-4",  # Убедитесь, что используете правильную модель
-            messages=api_messages,
+            #messages=api_messages,
+            messages=messages
             #files=files if files else None  # Отправляем файлы только если они есть
         )
         logging.info(f"Ответ OpenAI API: {response}")
