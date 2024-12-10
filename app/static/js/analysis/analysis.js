@@ -18,6 +18,7 @@ $(document).ready(function () {
                     checkAutomaticPrompt(); // Проверяем автоматический промпт только после загрузки промптов
                 });
                 loadChats();
+                loadUsers();
             },
             error: function () {
                 window.location.href = '/';
@@ -261,4 +262,28 @@ $(document).ready(function () {
             },
         });
     }
+
+
+    function loadUsers() {
+        $.ajax({
+            url: '/api/users',
+            type: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+            success: function (users) {
+                const userSelect = $('#user_id');
+                userSelect.empty();
+                userSelect.append('<option value="">-- Выберите пользователя --</option>');
+    
+                users.forEach(user => {
+                    userSelect.append(`<option value="${user.user_id}">${user.username || 'Без имени'}</option>`);
+                });
+    
+                console.log('Список пользователей успешно загружен:', users);
+            },
+            error: function () {
+                alert('Ошибка при загрузке пользователей.');
+            },
+        });
+    }
+    
 });

@@ -148,3 +148,17 @@ def get_user_prompts():
         logging.error(f"Ошибка при получении промптов: {str(e)}")
         return jsonify({'error': 'Failed to fetch prompts'}), 500
 
+@analysis_bp.route('/api/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    """
+    Возвращает список пользователей из базы данных.
+    """
+    from app.database.managers.user_manager import UserManager
+    user_manager = UserManager()
+    try:
+        users = user_manager.get_users()
+        return jsonify([user.to_dict() for user in users]), 200
+    except Exception as e:
+        logging.error(f"Ошибка при получении списка пользователей: {e}")
+        return jsonify({"error": "Ошибка при получении списка пользователей"}), 500
