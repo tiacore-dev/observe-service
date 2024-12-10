@@ -138,8 +138,8 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             data: filters,
             success: function (response) {
-                allMessages = response.messages;
-                console.log(`Всего сообщений для анализа: ${allMessages.length}`);
+                filteredMessagesMessages = response.messages;
+                console.log(`Всего сообщений для анализа: ${filteredMessages.length}`);
             },
             error: function () {
                 alert('Ошибка при загрузке всех сообщений для анализа.');
@@ -254,7 +254,7 @@ $(document).ready(function () {
             type: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             contentType: 'application/json',
-            data: JSON.stringify({ prompt_id, filters, messages: allMessages }),
+            data: JSON.stringify({ prompt_id, filters, messages: filteredMessages}),
             success: function () {
                 $('#loadingIcon').hide();
                 alert('Анализ успешно создан!');
