@@ -46,12 +46,9 @@ def chatgpt_analyze(prompt, messages):
     """
     logging.info(f"Начало анализа набора сообщений.")
 
-    from app.s3 import get_s3_manager, get_bucket_name
-    s3_manager = get_s3_manager()
-    bucket_name = get_bucket_name()
-
-    # Форматируем сообщения для OpenAI API
-    #api_messages = [{"role": "system", "content": prompt}]
+    #from app.s3 import get_s3_manager, get_bucket_name
+    #s3_manager = get_s3_manager()
+    #bucket_name = get_bucket_name()
     #files = []  # Список файлов для отправки в OpenAI
     api_messages = []
     for msg in messages:
@@ -67,7 +64,7 @@ def chatgpt_analyze(prompt, messages):
                     json.dumps(message_data, ensure_ascii=False)
                 )
     
-        # Проверяем наличие s3_key и скачиваем файл
+        """# Проверяем наличие s3_key и скачиваем файл
         if "s3_key" in msg and msg["s3_key"]:
             try:
                 file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
@@ -79,20 +76,17 @@ def chatgpt_analyze(prompt, messages):
                 #file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
                 #files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
             except Exception as e:
-                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
+                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")"""
 
-    logging.info("Перед вызовом OpenAI API")
-    #logging.info(api_messages)
+    logging.info("Начало проведения анализа")
+
     messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
             model="gpt-4o",  # Убедитесь, что используете правильную модель
-            #messages=api_messages,
             messages=messages
-            #files=files if files else None  # Отправляем файлы только если они есть
         )
-        #logging.info(f"Ответ OpenAI API: {response}")
 
         # Получение результата анализа
         analysis = response.choices[0].message.content
