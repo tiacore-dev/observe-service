@@ -98,7 +98,7 @@ $(document).ready(function () {
                     const target = $(event.target);
                     if (!target.closest('.delete-prompt').length && !target.closest('.use-automatic').length) {
                         const promptId = $(this).data('id');
-                        window.location.href = `/prompt/${promptId}/view`; // Переход на страницу просмотра
+                        window.location.href = `/prompt/${promptId}`; // Переход на страницу просмотра
                     }
                 });
 
