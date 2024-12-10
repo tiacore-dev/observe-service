@@ -138,7 +138,7 @@ $(document).ready(function () {
             headers: { Authorization: `Bearer ${token}` },
             data: filters,
             success: function (response) {
-                filteredMessagesMessages = response.messages;
+                filteredMessages = response.messages;
                 console.log(`Всего сообщений для анализа: ${filteredMessages.length}`);
             },
             error: function () {
