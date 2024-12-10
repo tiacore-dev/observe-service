@@ -99,28 +99,49 @@ $(document).ready(function () {
         const messagesList = $('#messagesList');
         messagesList.empty(); // Очищаем список перед добавлением новых сообщений
     
+        if (paginatedMessages.length === 0) {
+            messagesList.append('<p class="text-muted">Сообщений не найдено.</p>');
+            return;
+        }
+    
+        const table = $(`
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Дата и время</th>
+                        <th>User ID</th>
+                        <th>Chat ID</th>
+                        <th>Сообщение</th>
+                        <th>S3 Key</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        `);
+    
         paginatedMessages.forEach(msg => {
-            // Проверяем наличие необходимых полей
             const date = msg.timestamp ? moment(msg.timestamp).format('DD-MM-YYYY HH:mm:ss') : 'Не указано';
             const userId = msg.user_id || 'Не указано';
             const chatId = msg.chat_id || 'Не указано';
             const text = msg.text || 'Пустое сообщение';
             const s3Key = msg.s3_key || 'Не указано';
     
-            // Добавляем сообщение в список
-            messagesList.append(`
-                <div class="message-item border rounded p-2 mb-2">
-                    <p><strong>Дата и время:</strong> ${date}</p>
-                    <p><strong>User ID:</strong> ${userId}</p>
-                    <p><strong>Chat ID:</strong> ${chatId}</p>
-                    <p><strong>Сообщение:</strong> ${text}</p>
-                    <p><strong>S3 Key:</strong> ${s3Key}</p>
-                </div>
+            table.find('tbody').append(`
+                <tr>
+                    <td>${date}</td>
+                    <td>${userId}</td>
+                    <td>${chatId}</td>
+                    <td>${text}</td>
+                    <td>${s3Key}</td>
+                </tr>
             `);
         });
     
+        messagesList.append(table);
+    
         setupPagination(messages.length);
     }
+    
     
     
     function setupPagination(totalMessages) {
