@@ -47,8 +47,8 @@ def chatgpt_analyze(prompt, messages):
     logging.info(f"Начало анализа набора сообщений.")
 
     from app.s3 import get_s3_manager, get_bucket_name
-    #s3_manager = get_s3_manager()
-    #bucket_name = get_bucket_name()
+    s3_manager = get_s3_manager()
+    bucket_name = get_bucket_name()
 
     # Форматируем сообщения для OpenAI API
     #api_messages = [{"role": "system", "content": prompt}]
@@ -64,19 +64,22 @@ def chatgpt_analyze(prompt, messages):
                 }
                 # Добавляем сообщение как JSON
                 api_messages.append(
-                    #"role": "user",
-                    #"content": 
                     json.dumps(message_data, ensure_ascii=False)
                 )
     
-        """# Проверяем наличие s3_key и скачиваем файл
+        # Проверяем наличие s3_key и скачиваем файл
         if "s3_key" in msg and msg["s3_key"]:
             try:
-                logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
-                file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
-                files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
+                file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
+                api_messages.append({
+                    "role": "user",
+                    "content": f"Файл доступен по ссылке: {file_url}",
+                })
+                #logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
+                #file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
+                #files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
             except Exception as e:
-                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")"""
+                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
 
     logging.info("Перед вызовом OpenAI API")
     #logging.info(api_messages)
