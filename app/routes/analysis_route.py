@@ -44,7 +44,8 @@ def create_analysis():
 
     try:
         # Логика анализа
-        result_text, tokens_input, tokens_output = chatgpt_analyze(prompt_id, messages)
+        prompt = get_prompt(prompt_id)
+        result_text, tokens_input, tokens_output = chatgpt_analyze(prompt, messages)
 
         from app.database.managers.analysis_manager import AnalysisManager
         db_a = AnalysisManager()
