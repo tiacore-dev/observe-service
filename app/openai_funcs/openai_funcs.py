@@ -87,10 +87,11 @@ def chatgpt_analyze(prompt, messages):
 
         # Получение результата анализа
         analysis = response.choices[0].message.content
-        tokens = response.usage.total_tokens
+        tokens_input = response.usage.prompt_tokens  # Токены на отправку
+        tokens_output = response.usage.completion_tokens  # Токены на ответ
 
         logging.info("Анализ текста завершен.")
-        return analysis, tokens
+        return analysis, tokens_input, tokens_output
 
     except Exception as e:
         logging.error(f"Ошибка OpenAI API: {e}")

@@ -7,8 +7,11 @@
 <h2>Детали анализа</h2>
 <p><strong>Название промпта:</strong> <span id="promptName"></span></p>
 <p><strong>Фильтры:</strong> <span id="filters"></span></p>
-<p><strong>Текст анализа:</strong> <span id="analysisText"></span></p>
-<p><strong>Число токенов:</strong> <span id="analysisTokens"></span></p>
+<p><strong>Анализ:</strong> <span id="analysisText"></span></p>
+<p><strong>Токены на ввод:</strong> <span id="tokensInput"></span></p>
+<p><strong>Стоимость ввода ($):</strong> <span id="costInput"></span></p>
+<p><strong>Токены на вывод:</strong> <span id="tokensOutput"></span></p>
+<p><strong>Стоимость вывода ($):</strong> <span id="costOutput"></span></p>
 <p><strong>Дата создания:</strong> <span id="timestamp"></span></p>
 
 <button id="backButton" class="btn btn-secondary mt-4">Назад</button>
@@ -16,5 +19,6 @@
 <div id="loadingIndicator" class="spinner-border text-primary" role="status" style="display:none;">
     <span class="visually-hidden">Загрузка...</span>
 </div>
+
 
 {% endblock %}

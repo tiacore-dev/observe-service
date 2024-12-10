@@ -1,8 +1,8 @@
-import json
 from sqlalchemy import Column, String, Text, DateTime, Integer
 from datetime import datetime
 from app.database.db_setup import Base
 import uuid
+import json
 
 class AnalysisResult(Base):
     __tablename__ = 'analysis_results'
@@ -12,9 +12,10 @@ class AnalysisResult(Base):
     result_text = Column(Text, nullable=False)  # Результат анализа
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)  # Дата создания анализа
     filters = Column(String)  # Храним сериализованные фильтры
-    tokens = Column(Integer)
+    tokens_input = Column(Integer)  # Токены, потраченные на отправку
+    tokens_output = Column(Integer)  # Токены, потраченные на ответ
 
-    def save(self, session, prompt_id, result_text, filters, tokens):
+    def save(self, session, prompt_id, result_text, filters, tokens_input, tokens_output):
         """
         Сохранение анализа.
         """
@@ -26,7 +27,8 @@ class AnalysisResult(Base):
                 result_text=result_text,
                 timestamp=datetime.utcnow(),
                 filters=serialized_filters,
-                tokens=tokens,
+                tokens_input=tokens_input,
+                tokens_output=tokens_output,
             )
             session.add(analysis_result)
             session.commit()

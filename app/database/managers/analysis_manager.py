@@ -10,7 +10,7 @@ class AnalysisManager:
     def __init__(self):
         self.Session = Session
 
-    def save_analysis_result(self, prompt_id, result_text, filters, tokens):
+    def save_analysis_result(self, prompt_id, result_text, filters, tokens_input, tokens_output):
         session = self.Session()
         try:
             analysis_id = AnalysisResult().save(
@@ -18,7 +18,8 @@ class AnalysisManager:
                 prompt_id=prompt_id,
                 result_text=result_text,
                 filters=filters,
-                tokens=tokens,
+                tokens_input=tokens_input,
+                tokens_output=tokens_output
             )
             return analysis_id
         except Exception as e:
@@ -82,7 +83,8 @@ class AnalysisManager:
                     'timestamp': analysis.timestamp.isoformat(),
                     'result_text': analysis.result_text,
                     'filters': filters_readable or 'Не указаны',
-                    'tokens': analysis.tokens or 'Неизвестно'
+                    'tokens_input': analysis.tokens_input or 'Неизвестно',
+                    'tokens_output': analysis.tokens_output or 'Неизвестно'
                 }
             return None
         except Exception as e:

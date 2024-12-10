@@ -44,11 +44,11 @@ def create_analysis():
 
     try:
         # Логика анализа
-        result_text, tokens = chatgpt_analyze(prompt_id, messages)
+        result_text, tokens_input, tokens_output = chatgpt_analyze(prompt_id, messages)
 
         from app.database.managers.analysis_manager import AnalysisManager
         db_a = AnalysisManager()
-        analysis_id = db_a.save_analysis_result(prompt_id, result_text, filters, tokens)
+        analysis_id = db_a.save_analysis_result(prompt_id, result_text, filters, tokens_input, tokens_output)
         logging.info(f"Анализ успешно сохранен с analysis_id: {analysis_id}")
 
         return jsonify({
