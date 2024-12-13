@@ -97,7 +97,11 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     if not analysis_time or not send_time:
         logging.warning(f"Невозможно добавить задачу для чата {chat_id}: время анализа или отправки не указано.")
         return
-
+        # Преобразуем строки времени в объекты времени
+    if isinstance(analysis_time, str):
+        analysis_time = datetime.strptime(analysis_time, '%H:%M').time()
+    if isinstance(send_time, str):
+        send_time = datetime.strptime(send_time, '%H:%M').time()
     scheduler.add_job(
         execute_analysis_and_send,  # Единая функция анализа и отправки
         'cron',
