@@ -24,6 +24,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
     from app.openai_funcs.openai_funcs_async import chatgpt_analyze_async
     from app.utils.bot_utils import send_analysis_with_chat_link
     from app.database.managers.analysis_manager import AnalysisManager
+
     chat_manager = ChatManager()
     message_manager = MessageManager()
     analysis_manager = AnalysisManager()
@@ -36,9 +37,26 @@ async def execute_analysis_and_send(chat_id, analysis_time):
 
         # Формируем диапазон времени для анализа
         now = datetime.now(novosibirsk_tz)
-        analysis_start = datetime.combine((now - timedelta(days=1)).date(), analysis_time, tzinfo=novosibirsk_tz)
-        analysis_end = datetime.combine(now.date(), analysis_time, tzinfo=novosibirsk_tz)
+        analysis_start = datetime(
+            year=now.year,
+            month=now.month,
+            day=now.day - 1,
+            hour=analysis_time.hour,
+            minute=analysis_time.minute,
+            second=analysis_time.second,
+            tzinfo=novosibirsk_tz
+        )
+        analysis_end = datetime(
+            year=now.year,
+            month=now.month,
+            day=now.day,
+            hour=analysis_time.hour,
+            minute=analysis_time.minute,
+            second=analysis_time.second,
+            tzinfo=novosibirsk_tz
+        )
 
+        logging.info(f"Диапазон анализа: {analysis_start} - {analysis_end}")
 
         messages = message_manager.get_filtered_messages(
             start_date=analysis_start,
@@ -54,6 +72,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
         prompt = get_prompt(chat.default_prompt_id) or "Системный промпт для анализа."
         analysis_result, tokens_input, tokens_output = await chatgpt_analyze_async(prompt, messages)
         analysis_id = analysis_manager.save_analysis_result(chat.default_prompt_id, analysis_result, filters, tokens_input, tokens_output)
+
         # Формирование текста результата
         result_text = f"Результат анализа:\n{analysis_result}\n\n"
         result_text += f"Токены ввода: {tokens_input}, Токены вывода: {tokens_output}"
@@ -69,6 +88,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
         logging.info(f"Анализ для чата {chat_id} успешно выполнен и отправлен.")
     except Exception as e:
         logging.error(f"Ошибка при выполнении анализа для чата {chat_id}: {e}")
+
 
 
 
