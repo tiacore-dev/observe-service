@@ -120,22 +120,27 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         scheduler.remove_job(job_id=job_id)
 
     # Добавляем новую задачу
-    scheduler.add_job(
-        execute_analysis_and_send,  # Напрямую указываем асинхронную функцию
-        'cron',
-        hour=utc_dt.hour,
-        minute=utc_dt.minute,
-        args=[chat_id, analysis_time],  # Параметры для асинхронной функции
-        id=job_id,
-        replace_existing=True
-    )
+    try:
+        scheduler.add_job(
+            execute_analysis_and_send,
+            'cron',
+            hour=utc_dt.hour,
+            minute=utc_dt.minute,
+            args=[chat_id, analysis_time],
+            id=job_id,
+            replace_existing=True
+        )
+    except Exception as e:
+        logging.error(f"Ошибка при добавлении задачи {job_id}: {e}")
+
 
     logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time} (Новосибирское время).")
     list_scheduled_jobs()
 
 def list_scheduled_jobs():
     for job in scheduler.get_jobs():
-        logging.info(f"Job ID: {job.id}")
+        logging.info(f"Job ID: {job.id}, Next Run Time: {job.next_run_time}, Trigger: {job.trigger}")
+
 
 
 
