@@ -86,7 +86,6 @@ $(document).ready(function () {
         chats.forEach(chat => {
             console.log(`Рендерим чат: ${chat.chat_id} (${chat.chat_name || 'Без имени'})`);
             const chatRow = $(`<tr>
-                <td>${chat.chat_id}</td>
                 <td>${chat.chat_name || 'Без имени'}</td>
                 <td>
                     <select class="form-select prompt-select" data-chat-id="${chat.chat_id}">
