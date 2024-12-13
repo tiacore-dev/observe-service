@@ -3,8 +3,8 @@ import logging
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+import asyncio
 from app.utils.db_get import get_prompt
-from app.utils import parse_time
 from pytz import timezone
 novosibirsk_tz = timezone('Asia/Novosibirsk')
 now = datetime.now(novosibirsk_tz)
@@ -107,18 +107,16 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         return
 
     job_id = f"schedule_{chat_id}"
+
     # Удаляем существующую задачу, если она есть
-    # Проверяем существование задачи
     existing_job = scheduler.get_job(job_id=job_id)
     if existing_job:
         logging.info(f"Удаление существующей задачи для чата {chat_id} с ID {job_id}.")
         scheduler.remove_job(job_id=job_id)
-    else:
-        logging.warning(f"Задача с ID {job_id} не найдена в планировщике.")
 
     # Добавляем новую задачу
     scheduler.add_job(
-        execute_analysis_and_send,
+        run_async_analysis_and_send,
         'cron',
         hour=send_time.hour,
         minute=send_time.minute,
@@ -126,6 +124,14 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         id=job_id
     )
     logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time}.")
+
+
+def run_async_analysis_and_send(chat_id, analysis_time):
+    """
+    Обёртка для запуска асинхронной функции в синхронном контексте.
+    """
+    asyncio.run(execute_analysis_and_send(chat_id, analysis_time))
+
 
 
 def remove_schedule_from_scheduler(chat_id):
