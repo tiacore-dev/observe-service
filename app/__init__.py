@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from app.openai_funcs import init_openai
 from werkzeug.middleware.proxy_fix import ProxyFix
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
-from app.utils.scheduler import start_scheduler
+from app.utils.scheduler import start_scheduler, clear_existing_jobs
 import telebot
 
 # Настройка логирования
@@ -90,6 +90,7 @@ def create_app():
         raise
     
     try:
+        clear_existing_jobs()
         start_scheduler()
         logging.info("Менеджер расписаний успешно инициализирован.")
     except Exception as e:

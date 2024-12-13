@@ -141,3 +141,14 @@ def remove_schedule_from_scheduler(chat_id):
         logging.info(f"Задача {job_id} успешно удалена из планировщика.")
     except JobLookupError:
         logging.warning(f"Задача {job_id} не найдена в планировщике.")
+
+
+def clear_existing_jobs():
+    """
+    Удаляет все существующие задачи в планировщике.
+    """
+    try:
+        scheduler.remove_all_jobs()
+        logging.info("Все задачи успешно удалены из планировщика.")
+    except Exception as e:
+        logging.error(f"Ошибка при удалении всех задач: {e}")
