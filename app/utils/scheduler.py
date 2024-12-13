@@ -135,7 +135,7 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
 
 def list_scheduled_jobs():
     for job in scheduler.get_jobs():
-        logging.info(f"Job ID: {job.id}, Next Run Time: {job.next_run_time}")
+        logging.info(f"Job ID: {job.id}")
 
 
 
