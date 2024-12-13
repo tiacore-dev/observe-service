@@ -14,7 +14,7 @@ def manage_chats():
 
 
 
-@manage_chats_bp.route('/api/chats/<int:chat_id>/schedule', methods=['POST'])
+@manage_chats_bp.route('/api/chats/<chat_id>/schedule', methods=['POST'])
 @jwt_required()
 def update_schedule(chat_id):
     """
