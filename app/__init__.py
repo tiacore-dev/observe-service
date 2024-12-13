@@ -62,6 +62,7 @@ def create_app():
     bot = telebot.TeleBot(bot_token)
     sync_chats_from_messages(bot)
     update_usernames(bot)
+    bot.stop_bot() 
 
     # Инициализация JWT
     try:

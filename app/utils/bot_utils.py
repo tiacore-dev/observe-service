@@ -1,5 +1,14 @@
 from datetime import datetime
 import logging
+from aiogram import Bot
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+bot_token = os.getenv('TG_API_TOKEN')
+bot = Bot(bot_token)
+chat_id = os.getenv('CHAT_ID')
 
 def add_text(message, text, db_u, db):
     user_id = message.get('user_id')
@@ -119,23 +128,11 @@ def send_chat_link(bot_token, chat_id, target_chat_username):
         print(f"Ошибка отправки ссылки: {response.status_code}, {response.text}")
 
 
-def send_analysis_result(chat_id, bot_token, analysis_text):
-    """
-    Отправляет текст анализа в захардкоженный чат.
+async def send_analysis_result(analysis_text, chat_name):
+    message_text = f"Получен анализ текста для чата {chat_name}. Текст анализа: {analysis_text}"
+    try:
+        await bot.send_message(chat_id=chat_id, text=message_text)
+    except Exception as e:
+        logging.error(f"Ошибка при отправке сообщения в чат {chat_id}: {e}")
 
-    :param bot_token: Токен вашего бота.
-    :param analysis_text: Текст анализа, который нужно отправить.
-    """
-    #target_chat_id = -1001234567890  # ID чата (или username, например, @mychannel)
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    data = {
-        "chat_id": chat_id,
-        "text": analysis_text,
-    }
 
-    response = requests.post(url, data=data)
-
-    if response.status_code == 200:
-        print("Анализ успешно отправлен.")
-    else:
-        print(f"Ошибка отправки анализа: {response.status_code}, {response.text}")

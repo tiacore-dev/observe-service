@@ -22,7 +22,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
     from app.database.managers.message_manager import MessageManager
     from app.database.managers.chat_manager import ChatManager
     from app.openai_funcs.openai_funcs_async import chatgpt_analyze_async
-    from app.utils.bot_utils import send_analysis_with_chat_link
+    from app.utils.bot_utils import send_analysis_result
     from app.database.managers.analysis_manager import AnalysisManager
 
     chat_manager = ChatManager()
@@ -77,13 +77,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
         result_text = f"Результат анализа:\n{analysis_result}\n\n"
         result_text += f"Токены ввода: {tokens_input}, Токены вывода: {tokens_output}"
 
-        """# Отправка результата в Telegram
-        await send_analysis_with_chat_link(
-            bot_token="ваш_токен_бота",
-            target_chat_id=-1001234567890,  # Ваш целевой чат
-            analysis_text=result_text,
-            chat_username=f"chat_{chat_id}"
-        )"""
+        await send_analysis_result(analysis_result, chat.chat_name)
 
         logging.info(f"Анализ для чата {chat_id} успешно выполнен и отправлен.")
     except Exception as e:
@@ -145,22 +139,18 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         id=job_id,
         replace_existing=True
     )
-
-
     logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time}.")
     list_scheduled_jobs()
 
 def list_scheduled_jobs():
     for job in scheduler.get_jobs():
-        logging.info(f"Job ID: {job.id}")
+        logging.info(f"Job ID: {job.id}, trigger: {job.trigger}")
 
 def run_async_analysis_and_send(chat_id, analysis_time):
     """
     Обёртка для запуска асинхронной функции в синхронном контексте.
     """
     asyncio.run(execute_analysis_and_send(chat_id, analysis_time))
-
-
 
 def remove_schedule_from_scheduler(chat_id):
     job_id = f"schedule_{chat_id}"
