@@ -105,22 +105,21 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     if not analysis_time or not send_time:
         logging.warning(f"Невозможно добавить задачу для чата {chat_id}: время анализа или отправки не указано.")
         return
-        # Преобразуем строки времени в объекты времени
-    # Убедимся, что время в формате datetime.time
-    analysis_time = parse_time(analysis_time)
-    send_time = parse_time(send_time)
-    logging.info(f"Добавляется задача для чата {chat_id} с временем отправки {send_time} (Новосибирское время)")
 
+    job_id = f"schedule_{chat_id}"
+    # Удаляем существующую задачу, если она есть
+    scheduler.remove_job(job_id=job_id, jobstore='default', silent=True)
+
+    # Добавляем новую задачу
     scheduler.add_job(
-        execute_analysis_and_send,  # Единая функция анализа и отправки
+        execute_analysis_and_send,
         'cron',
         hour=send_time.hour,
         minute=send_time.minute,
         args=[chat_id, analysis_time],
-        id=f"schedule_{chat_id}"
+        id=job_id
     )
     logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time}.")
-
 
 
 def remove_schedule_from_scheduler(chat_id):
