@@ -7,6 +7,21 @@ manage_chats_bp = Blueprint('chats', __name__)
 # Настраиваем уровень логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+from datetime import datetime, time
+
+def parse_time(time_str):
+    """
+    Парсит строку времени в объект time, поддерживая форматы с и без секунд.
+    """
+    for fmt in ('%H:%M', '%H:%M:%S'):
+        try:
+            return datetime.strptime(time_str, fmt).time()
+        except ValueError:
+            continue
+    raise ValueError(f"Некорректный формат времени: {time_str}")
+
+
+
 @manage_chats_bp.route('/manage_chats', methods=['GET'])
 def manage_chats():
     logging.info("Страница управления чатами запрошена")
@@ -31,6 +46,11 @@ def update_schedule(chat_id):
     chat_manager = ChatManager()
 
     try:
+                # Преобразуем строки времени в объекты time
+        if analysis_time:
+            analysis_time = parse_time(analysis_time)
+        if send_time:
+            send_time = parse_time(send_time)
         # Обновляем расписание в базе
         chat_manager.update_schedule(chat_id, schedule_analysis, prompt_id, analysis_time, send_time)
 
