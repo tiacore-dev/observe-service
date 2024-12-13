@@ -18,6 +18,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
     """
     Выполняет анализ сообщений для указанного чата и отправляет результат в Telegram.
     """
+    logging.info(f'Начато выполнение задачи для чата: {chat_id}')
     from app.database.managers.message_manager import MessageManager
     from app.database.managers.chat_manager import ChatManager
     from app.openai_funcs.openai_funcs_async import chatgpt_analyze_async
