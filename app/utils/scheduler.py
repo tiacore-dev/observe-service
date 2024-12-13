@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import logging
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.memory import MemoryJobStore
 import asyncio
 from app.utils.db_get import get_prompt
 from pytz import timezone
@@ -10,7 +10,7 @@ novosibirsk_tz = timezone('Asia/Novosibirsk')
 now = datetime.now(novosibirsk_tz)
 
 scheduler = BackgroundScheduler(
-    jobstores={'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')},
+    jobstores={'default': MemoryJobStore()},
     timezone='Asia/Novosibirsk'
 )
 
@@ -121,7 +121,8 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         hour=send_time.hour,
         minute=send_time.minute,
         args=[chat_id, analysis_time],
-        id=job_id
+        id=job_id,
+        replace_existing=True
     )
     logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time}.")
 
