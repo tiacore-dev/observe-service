@@ -108,7 +108,13 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
 
     job_id = f"schedule_{chat_id}"
     # Удаляем существующую задачу, если она есть
-    scheduler.remove_job(job_id=job_id, jobstore='default', silent=True)
+    # Проверяем существование задачи
+    existing_job = scheduler.get_job(job_id=job_id)
+    if existing_job:
+        logging.info(f"Удаление существующей задачи для чата {chat_id} с ID {job_id}.")
+        scheduler.remove_job(job_id=job_id)
+    else:
+        logging.warning(f"Задача с ID {job_id} не найдена в планировщике.")
 
     # Добавляем новую задачу
     scheduler.add_job(
