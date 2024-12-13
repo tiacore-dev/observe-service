@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 import logging
-import asyncio
-from app.utils.bot_utils import send_analysis_with_chat_link
-from app.openai_funcs.openai_funcs_async import chatgpt_analyze_async
-
+from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
+from app.utils.db_get import get_prompt
 
 scheduler = BackgroundScheduler()
 
@@ -16,9 +14,10 @@ async def execute_analysis_and_send(chat_id, analysis_time):
     from app.database.managers.chat_manager import ChatManager
     from app.openai_funcs.openai_funcs_async import chatgpt_analyze_async
     from app.utils.bot_utils import send_analysis_with_chat_link
-
+    from app.database.managers.analysis_manager import AnalysisManager
     chat_manager = ChatManager()
     message_manager = MessageManager()
+    analysis_manager = AnalysisManager()
 
     try:
         chat = chat_manager.get_chat_by_id(chat_id)
@@ -36,15 +35,15 @@ async def execute_analysis_and_send(chat_id, analysis_time):
             end_date=analysis_end,
             chat_id=chat_id
         )
-
+        filters = {'chat_id': chat_id, 'start_date': analysis_start, 'end_date': analysis_end, 'user_id': None}
         if not messages:
             logging.warning(f"Нет сообщений для анализа в чате {chat_id}.")
             return
 
         # Выполнение анализа
-        prompt = chat.default_prompt or "Системный промпт для анализа."
+        prompt = get_prompt(chat.default_prompt_id) or "Системный промпт для анализа."
         analysis_result, tokens_input, tokens_output = await chatgpt_analyze_async(prompt, messages)
-
+        analysis_id = analysis_manager.save_analysis_result(chat.default_prompt_id, analysis_result, filters, tokens_input, tokens_output)
         # Формирование текста результата
         result_text = f"Результат анализа:\n{analysis_result}\n\n"
         result_text += f"Токены ввода: {tokens_input}, Токены вывода: {tokens_output}"
@@ -69,9 +68,6 @@ def start_scheduler():
     """
     
     from app.database.managers.chat_manager import ChatManager
-
-    
-
     # Инициализация задач из базы данных
     chat_manager = ChatManager()
     try:
@@ -113,12 +109,11 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time}.")
 
 
+
 def remove_schedule_from_scheduler(chat_id):
-    """
-    Удаляет задачу из планировщика по ID чата.
-    """
+    job_id = f"schedule_{chat_id}"
     try:
-        scheduler.remove_job(f"schedule_{chat_id}")
-        logging.info(f"Задача для чата {chat_id} удалена из планировщика.")
-    except Exception as e:
-        logging.warning(f"Ошибка при удалении задачи для чата {chat_id}: {e}")
+        scheduler.remove_job(job_id)
+        logging.info(f"Задача {job_id} успешно удалена из планировщика.")
+    except JobLookupError:
+        logging.warning(f"Задача {job_id} не найдена в планировщике.")
