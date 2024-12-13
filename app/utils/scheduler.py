@@ -2,10 +2,17 @@ from datetime import datetime, timedelta
 import logging
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from app.utils.db_get import get_prompt
 from app.utils import parse_time
+from pytz import timezone
+novosibirsk_tz = timezone('Asia/Novosibirsk')
+now = datetime.now(novosibirsk_tz)
 
-scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler(
+    jobstores={'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')},
+    timezone='Asia/Novosibirsk'
+)
 
 async def execute_analysis_and_send(chat_id, analysis_time):
     """
@@ -27,9 +34,10 @@ async def execute_analysis_and_send(chat_id, analysis_time):
             return
 
         # Формируем диапазон времени для анализа
-        now = datetime.utcnow()
-        analysis_start = datetime.combine(now.date() - timedelta(days=1), analysis_time)
-        analysis_end = datetime.combine(now.date(), analysis_time)
+        now = datetime.now(novosibirsk_tz)
+        analysis_start = datetime.combine((now - timedelta(days=1)).date(), analysis_time, tzinfo=novosibirsk_tz)
+        analysis_end = datetime.combine(now.date(), analysis_time, tzinfo=novosibirsk_tz)
+
 
         messages = message_manager.get_filtered_messages(
             start_date=analysis_start,
@@ -102,6 +110,8 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     # Убедимся, что время в формате datetime.time
     analysis_time = parse_time(analysis_time)
     send_time = parse_time(send_time)
+    logging.info(f"Добавляется задача для чата {chat_id} с временем отправки {send_time} (Новосибирское время)")
+
     scheduler.add_job(
         execute_analysis_and_send,  # Единая функция анализа и отправки
         'cron',
