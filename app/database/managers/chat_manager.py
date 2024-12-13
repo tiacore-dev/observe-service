@@ -1,7 +1,7 @@
 from app.database.models.chat import Chat
 from app.database.db_globals import Session
 from sqlalchemy import text
-from datetime import datetime
+from app.utils import parse_time
 import logging
 
 class ChatManager:
@@ -68,18 +68,9 @@ class ChatManager:
             if prompt_id:
                 chat.default_prompt_id = prompt_id
             if analysis_time:
-                try:
-                    # Пробуем распарсить как HH:MM, добавляем секунды, если их нет
-                    chat.analysis_time = datetime.strptime(analysis_time, '%H:%M').time()
-                except ValueError:
-                    chat.analysis_time = datetime.strptime(analysis_time, '%H:%M:%S').time()
-
+                chat.analysis_time = parse_time(analysis_time)
             if send_time:
-                try:
-                    # Пробуем распарсить как HH:MM, добавляем секунды, если их нет
-                    chat.send_time = datetime.strptime(send_time, '%H:%M').time()
-                except ValueError:
-                    chat.send_time = datetime.strptime(send_time, '%H:%M:%S').time()
+                chat.send_time = parse_time(send_time)
             session.commit()
         except Exception as e:
             session.rollback()

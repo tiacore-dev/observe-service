@@ -3,6 +3,7 @@ import logging
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.utils.db_get import get_prompt
+from app.utils import parse_time
 
 scheduler = BackgroundScheduler()
 
@@ -98,10 +99,9 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         logging.warning(f"Невозможно добавить задачу для чата {chat_id}: время анализа или отправки не указано.")
         return
         # Преобразуем строки времени в объекты времени
-    if isinstance(analysis_time, str):
-        analysis_time = datetime.strptime(analysis_time, '%H:%M').time()
-    if isinstance(send_time, str):
-        send_time = datetime.strptime(send_time, '%H:%M').time()
+    # Убедимся, что время в формате datetime.time
+    analysis_time = parse_time(analysis_time)
+    send_time = parse_time(send_time)
     scheduler.add_job(
         execute_analysis_and_send,  # Единая функция анализа и отправки
         'cron',

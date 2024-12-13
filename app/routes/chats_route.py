@@ -1,24 +1,15 @@
 from flask import Blueprint, render_template, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
+from app.utils import parse_time
 
 manage_chats_bp = Blueprint('chats', __name__)
 
 # Настраиваем уровень логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-from datetime import datetime, time
 
-def parse_time(time_str):
-    """
-    Парсит строку времени в объект time, поддерживая форматы с и без секунд.
-    """
-    for fmt in ('%H:%M', '%H:%M:%S'):
-        try:
-            return datetime.strptime(time_str, fmt).time()
-        except ValueError:
-            continue
-    raise ValueError(f"Некорректный формат времени: {time_str}")
+
 
 
 
