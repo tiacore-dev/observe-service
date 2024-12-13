@@ -81,59 +81,69 @@ $(document).ready(function () {
         console.log('Рендерим таблицу чатов...');
         const chatTable = $('#chatTable');
         chatTable.empty();
-
+    
         chats.forEach(chat => {
             console.log(`Рендерим чат: ${chat.chat_id} (${chat.chat_name || 'Без имени'})`);
-            const chatRow = $(`
-                <tr>
-                    <td>${chat.chat_id}</td>
-                    <td>${chat.chat_name || 'Без имени'}</td>
-                    <td>
-                        <select class="form-select prompt-select" data-chat-id="${chat.chat_id}">
-                            <option value="">-- Выберите промпт --</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary save-prompt-btn" data-chat-id="${chat.chat_id}">Сохранить</button>
-                    </td>
-                </tr>
-            `);
-
+            const chatRow = $(`<tr>
+                <td>${chat.chat_id}</td>
+                <td>${chat.chat_name || 'Без имени'}</td>
+                <td>
+                    <select class="form-select prompt-select" data-chat-id="${chat.chat_id}">
+                        <option value="">-- Выберите промпт --</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="checkbox" class="schedule-toggle" data-chat-id="${chat.chat_id}" ${chat.schedule_analysis ? 'checked' : ''}>
+                </td>
+                <td>
+                    <input type="time" class="form-control analysis-time" data-chat-id="${chat.chat_id}" value="${chat.analysis_time || ''}">
+                </td>
+                <td>
+                    <input type="time" class="form-control send-time" data-chat-id="${chat.chat_id}" value="${chat.send_time || ''}">
+                </td>
+                <td>
+                    <button class="btn btn-primary save-settings-btn" data-chat-id="${chat.chat_id}">Сохранить</button>
+                </td>
+            </tr>`);
+    
             const promptSelect = chatRow.find('.prompt-select');
             if (window.prompts) {
-                console.log(`Добавляем промпты для чата ${chat.chat_id}...`);
                 window.prompts.forEach(prompt => {
-                    console.log(`Добавляем промпт: ${prompt.prompt_name} (ID: ${prompt.prompt_id})`);
-                    promptSelect.append(`
-                        <option value="${prompt.prompt_id}" ${chat.default_prompt_id === prompt.prompt_id ? 'selected' : ''}>
-                            ${prompt.prompt_name}
-                        </option>
-                    `);
+                    promptSelect.append(`<option value="${prompt.prompt_id}" ${chat.default_prompt_id === prompt.prompt_id ? 'selected' : ''}>${prompt.prompt_name}</option>`);
                 });
-            } else {
-                console.warn('Список промптов не загружен или пуст.');
             }
-
+    
             chatTable.append(chatRow);
         });
-
-        $('.save-prompt-btn').on('click', function () {
+    
+        $('.save-settings-btn').on('click', function () {
             const chatId = $(this).data('chat-id');
             const promptId = $(`.prompt-select[data-chat-id="${chatId}"]`).val();
-            console.log(`Нажата кнопка сохранения для чата ${chatId}. Выбран промпт: ${promptId}`);
-
-            if (!promptId) {
-                alert('Пожалуйста, выберите промпт.');
-                console.warn('Сохранение отменено: промпт не выбран.');
-                return;
-            }
-
-            savePrompt(chatId, promptId);
+            const scheduleAnalysis = $(`.schedule-toggle[data-chat-id="${chatId}"]`).is(':checked');
+            const analysisTime = $(`.analysis-time[data-chat-id="${chatId}"]`).val();
+            const sendTime = $(`.send-time[data-chat-id="${chatId}"]`).val();
+    
+            saveSettings(chatId, promptId, scheduleAnalysis, analysisTime, sendTime);
         });
-
-        console.log('Отображаем содержимое страницы...');
-        $('#content').show();
     }
+    
+    function saveSettings(chatId, promptId, scheduleAnalysis, analysisTime, sendTime) {
+        $.ajax({
+            url: `/api/chats/${chatId}/schedule`,
+            type: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            contentType: 'application/json',
+            data: JSON.stringify({prompt_id: promptId, schedule_analysis: scheduleAnalysis, analysis_time: analysisTime, send_time: sendTime }),
+            success: function () {
+                console.log(`Настройки для чата ${chatId} успешно сохранены.`);
+                alert('Настройки успешно сохранены.');
+            },
+            error: function () {
+                alert('Ошибка при сохранении настроек.');
+            }
+        });
+    }
+    
 
     function savePrompt(chatId, promptId) {
         console.log(`Сохраняем промпт ${promptId} для чата ${chatId}...`);

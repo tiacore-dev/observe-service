@@ -23,13 +23,15 @@ def sync_chats_from_messages(bot):
                 # Получаем информацию о чате через Telegram API
                 chat_info = bot.get_chat(chat_id)
                 chat_name = chat_info.title  # Название чата
-
+                if chat_name:
                 # Добавляем чат в таблицу chats
-                chat_manager.add_chat(chat_id=chat_id, chat_name=chat_name)
-                logging.info(f"Чат {chat_id} с названием '{chat_name}' добавлен в таблицу chats.")
+                    chat_manager.add_chat(chat_id=chat_id, chat_name=chat_name)
+                    logging.info(f"Чат {chat_id} с названием '{chat_name}' добавлен в таблицу chats.")
             except Exception as e:
                 logging.info(f"Не удалось добавить чат {chat_id}: {e}")
         else:
+            if not existing_chat.chat_name:
+                chat_manager.delete_chat(chat_id)
             logging.info(f"Чат {chat_id} уже существует в базе данных.")
 
 

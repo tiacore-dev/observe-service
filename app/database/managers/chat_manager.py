@@ -1,6 +1,8 @@
 from app.database.models.chat import Chat
 from app.database.db_globals import Session
 from sqlalchemy import text
+from datetime import datetime
+import logging
 
 class ChatManager:
     def __init__(self):
@@ -52,17 +54,43 @@ class ChatManager:
         finally:
             session.close()
 
-    def update_default_prompt(self, chat_id, prompt_id):
-        """Обновление дефолтного промпта для чата"""
+
+    def update_schedule(self, chat_id, schedule_analysis, prompt_id=None, analysis_time=None, send_time=None):
+        """
+        Обновить расписание для чата.
+        """
         session = self.Session()
         try:
             chat = session.query(Chat).filter_by(chat_id=chat_id).first()
-            if chat:
+            if not chat:
+                raise ValueError(f"Chat {chat_id} не найден")
+            chat.schedule_analysis = schedule_analysis
+            if prompt_id:
                 chat.default_prompt_id = prompt_id
-                session.commit()
-            else:
-                raise ValueError("Chat not found")
+            if analysis_time:
+                chat.analysis_time = datetime.strptime(analysis_time, '%H:%M:%S').time()
+            if send_time:
+                chat.send_time = datetime.strptime(send_time, '%H:%M:%S').time()
+            session.commit()
         except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def delete_chat(self, chat_id):
+        session = self.Session()
+        try:
+            logging.info(f"Удаление чата '{chat_id}'")
+            chat = session.query(Chat).filter_by(chat_id=chat_id).first()
+            if chat:
+                session.delete(chat)
+                session.commit()
+                logging.info(f"Чат '{chat_id}' успешно удален.")
+            else:
+                logging.warning(f"Чат '{chat_id}' не найден")
+        except Exception as e:
+            logging.error(f"Ошибка при удалении чата: {e}")
             session.rollback()
             raise e
         finally:

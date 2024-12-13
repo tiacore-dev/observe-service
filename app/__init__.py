@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from app.openai_funcs import init_openai
 from werkzeug.middleware.proxy_fix import ProxyFix
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
+from app.utils.scheduler import start_scheduler
 import telebot
 
 # Настройка логирования
@@ -51,9 +52,9 @@ def create_app():
         database_url = os.getenv('DATABASE_URL')
         engine, Session, Base = init_db(database_url)
         set_db_globals(engine, Session, Base)
-        logging.info("База данных успешно инициализирована.", extra={'user_id': 'init'})
+        logging.info("База данных успешно инициализирована.")
     except Exception as e:
-        logging.error(f"Ошибка при инициализации базы данных: {e}", extra={'user_id': 'init'})
+        logging.error(f"Ошибка при инициализации базы данных: {e}")
         raise
 
     # Инициализация бота
@@ -67,33 +68,39 @@ def create_app():
         app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') 
         jwt = JWTManager(app)
         app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1) 
-        logging.info(f"JWT инициализирован. {app.config['JWT_ACCESS_TOKEN_EXPIRES']}", extra={'user_id': 'init'})
+        logging.info(f"JWT инициализирован. {app.config['JWT_ACCESS_TOKEN_EXPIRES']}")
     except Exception as e:
-        logging.error(f"Ошибка при инициализации JWT: {e}", extra={'user_id': 'init'})
+        logging.error(f"Ошибка при инициализации JWT: {e}")
         raise
     app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY') 
     # Инициализация OpenAI
     try:
         init_openai(app)
-        logging.info("OpenAI успешно инициализирован.", extra={'user_id': 'init'})
+        logging.info("OpenAI успешно инициализирован.")
     except Exception as e:
-        logging.error(f"Ошибка при инициализации OpenAI: {e}", extra={'user_id': 'init'})
+        logging.error(f"Ошибка при инициализации OpenAI: {e}")
         raise
 
     # Инициализация S3
     try:
         init_s3_manager()
-        logging.info("S3 менеджер успешно инициализирован.", extra={'user_id': 'init'})
+        logging.info("S3 менеджер успешно инициализирован.")
     except Exception as e:
-        logging.error(f"Ошибка при инициализации S3: {e}", extra={'user_id': 'init'})
+        logging.error(f"Ошибка при инициализации S3: {e}")
         raise
-
+    
+    try:
+        start_scheduler()
+        logging.info("Менеджер расписаний успешно инициализирован.")
+    except Exception as e:
+        logging.error(f"Ошибка при инициализации менеджера расписаний: {e}")
+        raise
     # Регистрация маршрутов
     try:
         register_routes(app)
-        logging.info("Маршруты успешно зарегистрированы.", extra={'user_id': 'init'})
+        logging.info("Маршруты успешно зарегистрированы.")
     except Exception as e:
-        logging.error(f"Ошибка при регистрации маршрутов: {e}", extra={'user_id': 'init'})
+        logging.error(f"Ошибка при регистрации маршрутов: {e}")
         raise
  
     return app

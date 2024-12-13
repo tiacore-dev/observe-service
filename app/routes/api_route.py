@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 
@@ -46,31 +46,6 @@ def get_messages():
         logging.error(f"Ошибка при фильтрации сообщений: {str(e)}")
         return jsonify({'error': 'Failed to fetch messages'}), 500
 
-    
-
-@api_bp.route('/api/analyze', methods=['GET'])
-@jwt_required()
-def get_all_messages_for_analysis():
-    """
-    Возвращает все отфильтрованные сообщения для анализа.
-    """
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    user_id = request.args.get('user_id')
-    chat_id = request.args.get('chat_id')
-
-    logging.info(f"Запрос всех сообщений для анализа: start_date={start_date}, end_date={end_date}, user_id={user_id}, chat_id={chat_id}")
-
-    from app.database.managers.message_manager import MessageManager
-    manager = MessageManager()
-
-    try:
-        messages = manager.get_filtered_messages(start_date=start_date, end_date=end_date, user_id=user_id, chat_id=chat_id)
-        logging.info(f"Найдено {len(messages)} сообщений для анализа.")
-        return jsonify({'messages': [msg.to_dict() for msg in messages]}), 200
-    except Exception as e:
-        logging.error(f"Ошибка при получении сообщений для анализа: {str(e)}")
-        return jsonify({'error': 'Не удалось получить сообщения для анализа'}), 500
 
 
 
@@ -121,12 +96,12 @@ def get_prompts():
         return jsonify({'error': 'Ошибка при получении промптов'}), 500
     
 
-@api_bp.route('/api/<string:s3_key>/download', methods=['GET'])
+"""@api_bp.route('/api/<string:s3_key>/download', methods=['GET'])
 @jwt_required()
 def download_from_s3(s3_key):
-    """
+
     Скачивает файл из S3-хранилища по указанному ключу.
-    """
+
     from app.s3 import get_s3_manager, get_bucket_name
 
     s3_manager = get_s3_manager()
@@ -157,7 +132,7 @@ def download_from_s3(s3_key):
         )
     except Exception as e:
         logging.error(f"Ошибка при скачивании файла '{s3_key}': {e}")
-        return jsonify({"error": "Ошибка при скачивании файла"}), 500
+        return jsonify({"error": "Ошибка при скачивании файла"}), 500"""
     
 
 @api_bp.route('/api/download', methods=['GET'])

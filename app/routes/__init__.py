@@ -5,7 +5,7 @@ from .prompt_route import prompt_bp
 from .logs_route import logs_bp
 from .analysis_route import analysis_bp
 from .gateway_routes import gateway_bp
-from .manage_chats_route import manage_chats_bp
+from .chats_route import manage_chats_bp
 from .api_route import api_bp
 
 
