@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta
 import logging
 from apscheduler.jobstores.base import JobLookupError
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.memory import MemoryJobStore
 import asyncio
 from app.utils.db_get import get_prompt
-from pytz import timezone
+from pytz import timezone, utc
 novosibirsk_tz = timezone('Asia/Novosibirsk')
 now = datetime.now(novosibirsk_tz)
 
-scheduler = BackgroundScheduler(
+scheduler = AsyncIOScheduler(
     jobstores={'default': MemoryJobStore()},
     timezone='Asia/Novosibirsk'
 )
@@ -98,6 +98,7 @@ def start_scheduler():
 
 
 
+# При добавлении задачи теперь указывайте асинхронную функцию
 def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     """
     Добавляет или обновляет задачу анализа для указанного чата.
@@ -105,6 +106,10 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     if not analysis_time or not send_time:
         logging.warning(f"Невозможно добавить задачу для чата {chat_id}: время анализа или отправки не указано.")
         return
+
+    # Конвертируем send_time в UTC
+    local_dt = datetime.combine(datetime.now(novosibirsk_tz).date(), send_time)
+    utc_dt = local_dt.astimezone(utc)
 
     job_id = f"schedule_{chat_id}"
 
@@ -116,22 +121,23 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
 
     # Добавляем новую задачу
     scheduler.add_job(
-        run_async_analysis_and_send,
+        execute_analysis_and_send,  # Напрямую указываем асинхронную функцию
         'cron',
-        hour=send_time.hour,
-        minute=send_time.minute,
-        args=[chat_id, analysis_time],
+        hour=utc_dt.hour,
+        minute=utc_dt.minute,
+        args=[chat_id, analysis_time],  # Параметры для асинхронной функции
         id=job_id,
         replace_existing=True
     )
-    logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time}.")
+
+    logging.info(f"Задача для чата {chat_id} добавлена в планировщик: анализ в {analysis_time}, отправка в {send_time} (Новосибирское время).")
+    list_scheduled_jobs()
+
+def list_scheduled_jobs():
+    for job in scheduler.get_jobs():
+        logging.info(f"Job ID: {job.id}, Next Run Time: {job.next_run_time}")
 
 
-def run_async_analysis_and_send(chat_id, analysis_time):
-    """
-    Обёртка для запуска асинхронной функции в синхронном контексте.
-    """
-    asyncio.run(execute_analysis_and_send(chat_id, analysis_time))
 
 
 
