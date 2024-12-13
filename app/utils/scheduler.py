@@ -85,7 +85,6 @@ def start_scheduler():
             if chat.schedule_analysis and chat.send_time:
                 # Добавляем задачу для каждого чата с активным расписанием
                 add_schedule_to_scheduler(
-                    scheduler=scheduler,
                     chat_id=chat.chat_id,
                     analysis_time=chat.analysis_time,
                     send_time=chat.send_time
