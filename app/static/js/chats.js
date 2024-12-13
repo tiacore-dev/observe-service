@@ -74,6 +74,7 @@ $(document).ready(function () {
     function checkAndRender() {
         if (promptsLoaded && chatsLoaded) {
             renderChats(chatsData);
+            $('#content').show();
         }
     }
 
