@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 from app.utils import parse_time
 
-manage_chats_bp = Blueprint('chats', __name__)
+chats_bp = Blueprint('chats', __name__)
 
 # Настраиваем уровень логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -13,14 +13,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 
-@manage_chats_bp.route('/manage_chats', methods=['GET'])
+@chats_bp.route('/manage_chats', methods=['GET'])
 def manage_chats():
     logging.info("Страница управления чатами запрошена")
     return render_template('chats.html')
 
 
 
-@manage_chats_bp.route('/api/chats/<chat_id>/schedule', methods=['POST'])
+@chats_bp.route('/api/chats/<chat_id>/schedule', methods=['POST'])
 @jwt_required()
 def update_schedule(chat_id):
     """
