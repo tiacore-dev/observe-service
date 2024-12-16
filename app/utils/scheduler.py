@@ -63,8 +63,8 @@ async def execute_analysis_and_send(chat_id, analysis_time):
             raise ValueError("analysis_start и analysis_end должны быть объектами datetime.")
 
         messages = message_manager.get_filtered_messages(
-            start_date=analysis_start,
-            end_date=analysis_end,
+            start_date=analysis_start.isoformat(),  # Преобразуем datetime в строку ISO-формата
+            end_date=analysis_end.isoformat(),      # Преобразуем datetime в строку ISO-формата
             chat_id=chat_id
         )
         filters = {'chat_id': chat_id, 'start_date': analysis_start, 'end_date': analysis_end, 'user_id': None}

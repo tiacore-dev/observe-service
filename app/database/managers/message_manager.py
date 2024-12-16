@@ -37,12 +37,22 @@ class MessageManager:
 
         # Фильтр по периоду
         if start_date:
-            start_date_parsed = datetime.strptime(start_date, "%Y-%m-%d")
+            if isinstance(start_date, str):
+                start_date_parsed = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+            elif isinstance(start_date, datetime):
+                start_date_parsed = start_date
+            else:
+                raise ValueError("start_date должен быть строкой или datetime.")
             query = query.filter(Message.timestamp >= start_date_parsed)
 
         if end_date:
-            end_date_parsed = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
-            query = query.filter(Message.timestamp < end_date_parsed)
+            if isinstance(end_date, str):
+                end_date_parsed = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+            elif isinstance(end_date, datetime):
+                end_date_parsed = end_date
+            else:
+                raise ValueError("end_date должен быть строкой или datetime.")
+            query = query.filter(Message.timestamp <= end_date_parsed)
 
         # Фильтр по пользователю
         if user_id:
@@ -53,6 +63,7 @@ class MessageManager:
             query = query.filter(Message.chat_id == int(chat_id))
 
         return query.all()
+
 
 
     def get_paginated_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None, limit=10, offset=0):

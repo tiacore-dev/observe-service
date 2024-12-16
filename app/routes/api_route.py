@@ -5,7 +5,8 @@ import logging
 api_bp = Blueprint('api', __name__)
 
 
-# Получение сообщений с фильтрацией
+from datetime import datetime, timedelta
+
 @api_bp.route('/api/messages', methods=['GET'])
 @jwt_required()
 def get_messages():
@@ -22,6 +23,14 @@ def get_messages():
     manager = MessageManager()
 
     try:
+        # Преобразуем start_date и end_date, добавляя время, если нужно
+        if start_date:
+            start_date = datetime.strptime(start_date, "%Y-%m-%d")
+            start_date = start_date.replace(hour=0, minute=0, second=0)
+        if end_date:
+            end_date = datetime.strptime(end_date, "%Y-%m-%d")
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+
         # Рассчитываем limit и offset
         offset = (page - 1) * page_size
         limit = page_size
@@ -45,6 +54,7 @@ def get_messages():
     except Exception as e:
         logging.error(f"Ошибка при фильтрации сообщений: {str(e)}")
         return jsonify({'error': 'Failed to fetch messages'}), 500
+
 
 
 
