@@ -15,7 +15,7 @@ async def chatgpt_analyze_async(prompt, messages):
             message_data = {
                 "user_id": msg.get("user_id", "Неизвестно"),
                 "chat_id": msg.get("chat_id", "Неизвестно"),
-                "timestamp": msg.get("timestamp", "Неизвестно"),  # Убедитесь, что timestamp строка
+                "timestamp": str(msg.get("timestamp", "Неизвестно")),  # Убедитесь, что timestamp строка
                 "text": msg.get("text", "Пустое сообщение"),
             }
             api_messages.append(json.dumps(message_data, ensure_ascii=False))
