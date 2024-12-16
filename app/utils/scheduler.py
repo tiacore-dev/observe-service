@@ -67,6 +67,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
             end_date=analysis_end.isoformat(),      # Преобразуем datetime в строку ISO-формата
             chat_id=chat_id
         )
+        messages = [msg.to_dict() for msg in messages]
         filters = {'chat_id': chat_id, 'start_date': analysis_start, 'end_date': analysis_end, 'user_id': None}
         if not messages:
             logging.warning(f"Нет сообщений для анализа в чате {chat_id}.")
