@@ -49,7 +49,6 @@ def chatgpt_analyze(prompt, messages):
     from app.s3 import get_s3_manager, get_bucket_name
     s3_manager = get_s3_manager()
     bucket_name = get_bucket_name()
-    files = {}  # Список файлов для отправки в OpenAI
     api_messages = []
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
@@ -95,8 +94,7 @@ def chatgpt_analyze(prompt, messages):
                 {"role": "user", "content": [{"type": "text", "text": f"{api_messages}"}, 
                 {"type": "image_url"}                                                                    
                                                         ]} ]"""
-    messages = [{"role": "system", "content": prompt}, 
-                {"role": "user", "content": api_messages}]
+    messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
