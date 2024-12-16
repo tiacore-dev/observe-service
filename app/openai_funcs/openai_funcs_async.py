@@ -2,6 +2,7 @@ import logging
 import json
 from openai import AsyncOpenAI
 
+client = AsyncOpenAI()
 
 async def chatgpt_analyze_async(prompt, messages):
     """
@@ -29,7 +30,7 @@ async def chatgpt_analyze_async(prompt, messages):
             messages_payload.append({"role": "user", "content": msg})
 
         # Вызов OpenAI API
-        response = await AsyncOpenAI.chat.completions.create(
+        response = await client.chat.completions.create(
             model="gpt-4",  # Убедитесь, что используете правильную модель
             messages=messages_payload
         )

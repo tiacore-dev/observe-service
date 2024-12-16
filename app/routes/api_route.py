@@ -71,6 +71,13 @@ def get_all_messages_for_analysis():
 
     from app.database.managers.message_manager import MessageManager
     manager = MessageManager()
+    # Преобразуем start_date и end_date, добавляя время, если нужно
+    if start_date:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        start_date = start_date.replace(hour=0, minute=0, second=0)
+    if end_date:
+        end_date = datetime.strptime(end_date, "%Y-%m-%d")
+        end_date = end_date.replace(hour=23, minute=59, second=59)
 
     try:
         messages = manager.get_filtered_messages(start_date=start_date, end_date=end_date, user_id=user_id, chat_id=chat_id)
