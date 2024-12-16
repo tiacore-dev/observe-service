@@ -140,7 +140,6 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         'cron',
         hour=send_time.hour,
         minute=send_time.minute,
-        seconds=0,
         args=[chat_id, analysis_time],
         id=job_id,
         replace_existing=True
