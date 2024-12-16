@@ -49,7 +49,7 @@ def chatgpt_analyze(prompt, messages):
     from app.s3 import get_s3_manager, get_bucket_name
     s3_manager = get_s3_manager()
     bucket_name = get_bucket_name()
-    files = []  # Список файлов для отправки в OpenAI
+    files = {}  # Список файлов для отправки в OpenAI
     api_messages = []
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
@@ -69,9 +69,20 @@ def chatgpt_analyze(prompt, messages):
             try:
                 logging.info(f"Создание ссылки по ключу: {msg['s3_key']}")
                 file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
-                files.append({
+                """files.append({
                     "url": file_url
-                })
+                })"""
+                message_data = {
+                    "user_id": msg.get("user_id", "Неизвестно"),
+                    "chat_id": msg.get("chat_id", "Неизвестно"),
+                    "timestamp": msg.get("timestamp", "Неизвестно"),
+                    "text": msg.get("text", "Пустое сообщение"),
+                    "Ссылка на изображение": file_url
+                }
+                # Добавляем сообщение как JSON
+                api_messages.append(
+                    json.dumps(message_data, ensure_ascii=False)
+                )
                 #logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
                 #file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
                 #files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
@@ -80,10 +91,12 @@ def chatgpt_analyze(prompt, messages):
 
     logging.info("Начало проведения анализа")
 
-    messages = [{"role": "system", "content": prompt}, 
+    """messages = [{"role": "system", "content": prompt}, 
                 {"role": "user", "content": [{"type": "text", "text": f"{api_messages}"}, 
-                {"type": "image_url", "image_url": files}                                                                    
-                                                        ]} ]
+                {"type": "image_url"}                                                                    
+                                                        ]} ]"""
+    messages = [{"role": "system", "content": prompt}, 
+                {"role": "user", "content": api_messages}]
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
