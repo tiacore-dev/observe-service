@@ -56,7 +56,29 @@ def get_messages():
         return jsonify({'error': 'Failed to fetch messages'}), 500
 
 
+@api_bp.route('/api/analyze', methods=['GET'])
+@jwt_required()
+def get_all_messages_for_analysis():
+    """
+    Возвращает все отфильтрованные сообщения для анализа.
+    """
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    user_id = request.args.get('user_id')
+    chat_id = request.args.get('chat_id')
 
+    logging.info(f"Запрос всех сообщений для анализа: start_date={start_date}, end_date={end_date}, user_id={user_id}, chat_id={chat_id}")
+
+    from app.database.managers.message_manager import MessageManager
+    manager = MessageManager()
+
+    try:
+        messages = manager.get_filtered_messages(start_date=start_date, end_date=end_date, user_id=user_id, chat_id=chat_id)
+        logging.info(f"Найдено {len(messages)} сообщений для анализа.")
+        return jsonify({'messages': [msg.to_dict() for msg in messages]}), 200
+    except Exception as e:
+        logging.error(f"Ошибка при получении сообщений для анализа: {str(e)}")
+        return jsonify({'error': 'Не удалось получить сообщения для анализа'}), 500
 
 
 @api_bp.route('/api/users', methods=['GET'])
