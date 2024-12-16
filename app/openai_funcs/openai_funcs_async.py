@@ -1,6 +1,7 @@
 import logging
 import json
 from openai import AsyncOpenAI
+from datetime import datetime
 
 client = AsyncOpenAI()
 
@@ -16,7 +17,7 @@ async def chatgpt_analyze_async(prompt, messages):
             message_data = {
                 "user_id": msg.get("user_id", "Неизвестно"),
                 "chat_id": msg.get("chat_id", "Неизвестно"),
-                "timestamp": str(msg.get("timestamp", "Неизвестно")),  # Убедитесь, что timestamp строка
+                "timestamp": msg.get("timestamp", "Неизвестно").isoformat() if isinstance(msg.get("timestamp"), datetime) else str(msg.get("timestamp", "Неизвестно")),
                 "text": msg.get("text", "Пустое сообщение"),
             }
             api_messages.append(json.dumps(message_data, ensure_ascii=False))
@@ -25,14 +26,12 @@ async def chatgpt_analyze_async(prompt, messages):
 
     # Формируем правильный запрос
     try:
-        messages_payload = [{"role": "system", "content": prompt}]
-        for msg in api_messages:
-            messages_payload.append({"role": "user", "content": msg})
+        messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
 
         # Вызов OpenAI API
         response = await client.chat.completions.create(
-            model="gpt-4",  # Убедитесь, что используете правильную модель
-            messages=messages_payload
+            model="gpt-4o",  # Убедитесь, что используете правильную модель
+            messages=messages
         )
 
         # Получение результата анализа
