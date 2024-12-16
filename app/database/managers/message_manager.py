@@ -3,6 +3,7 @@ from app.database.db_globals import Session
 import logging
 import uuid
 from datetime import datetime, timedelta
+from dateutil.parser import isoparse
 
 class MessageManager:
     def __init__(self):
@@ -38,20 +39,26 @@ class MessageManager:
         # Фильтр по периоду
         if start_date:
             if isinstance(start_date, str):
-                start_date_parsed = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+                try:
+                    start_date_parsed = isoparse(start_date)  # Используем isoparse для строк с временными зонами
+                except ValueError as e:
+                    raise ValueError(f"Некорректный формат start_date: {start_date}") from e
             elif isinstance(start_date, datetime):
                 start_date_parsed = start_date
             else:
-                raise ValueError("start_date должен быть строкой или datetime.")
+                raise ValueError("start_date должен быть строкой в формате ISO 8601 или datetime.")
             query = query.filter(Message.timestamp >= start_date_parsed)
 
         if end_date:
             if isinstance(end_date, str):
-                end_date_parsed = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+                try:
+                    end_date_parsed = isoparse(end_date)  # Используем isoparse для строк с временными зонами
+                except ValueError as e:
+                    raise ValueError(f"Некорректный формат end_date: {end_date}") from e
             elif isinstance(end_date, datetime):
                 end_date_parsed = end_date
             else:
-                raise ValueError("end_date должен быть строкой или datetime.")
+                raise ValueError("end_date должен быть строкой в формате ISO 8601 или datetime.")
             query = query.filter(Message.timestamp <= end_date_parsed)
 
         # Фильтр по пользователю
@@ -63,7 +70,6 @@ class MessageManager:
             query = query.filter(Message.chat_id == int(chat_id))
 
         return query.all()
-
 
 
     def get_paginated_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None, limit=10, offset=0):
