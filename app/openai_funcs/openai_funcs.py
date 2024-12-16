@@ -74,18 +74,19 @@ def chatgpt_analyze(prompt, messages):
                     "image_url": {"url": f"{file_url}"}
                 }
                 message_data = {
+                    "type": "text", "text": {
                     "user_id": msg.get("user_id", "Неизвестно"),
                     "chat_id": msg.get("chat_id", "Неизвестно"),
                     "timestamp": msg.get("timestamp", "Неизвестно"),
                     "text": msg.get("text", "Пустое сообщение"),
                     #"Ссылка на изображение": file_url
-                }
+                }}
                 # Добавляем сообщение как JSON
                 api_messages.append(
                     json.dumps(message_data, ensure_ascii=False)
                 )
 
-                files.append(
+                api_messages.append(
                     json.dumps(file_data, ensure_ascii=False)
                 )
                 #logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
@@ -95,11 +96,7 @@ def chatgpt_analyze(prompt, messages):
                 logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
 
     logging.info("Начало проведения анализа")
-    api_messages = [{"type": "text", "text": f"{api_messages}"}, files]
-    """messages = [{"role": "system", "content": prompt}, 
-                {"role": "user", "content": [{"type": "text", "text": f"{api_messages}"}, 
-                {"type": "image_url"}                                                                    
-                                                        ]} ]"""
+    #api_messages = [{"type": "text", "text": f"{api_messages}"}, files]
     messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
     try:
         # Вызов OpenAI API
