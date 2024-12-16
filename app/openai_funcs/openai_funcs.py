@@ -67,13 +67,14 @@ def chatgpt_analyze(prompt, messages):
         # Проверяем наличие s3_key и скачиваем файл
         if "s3_key" in msg and msg["s3_key"]:
             try:
+                logging.info(f"Создание ссылки по ключу: {msg['s3_key']}")
                 file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
                 files.append({
                     "url": file_url
                 })
-                logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
-                file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
-                files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
+                #logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
+                #file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
+                #files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
             except Exception as e:
                 logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
 
