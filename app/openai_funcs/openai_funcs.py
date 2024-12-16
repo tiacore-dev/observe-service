@@ -46,10 +46,10 @@ def chatgpt_analyze(prompt, messages):
     """
     logging.info(f"Начало анализа набора сообщений.")
 
-    #from app.s3 import get_s3_manager, get_bucket_name
-    #s3_manager = get_s3_manager()
-    #bucket_name = get_bucket_name()
-    #files = []  # Список файлов для отправки в OpenAI
+    from app.s3 import get_s3_manager, get_bucket_name
+    s3_manager = get_s3_manager()
+    bucket_name = get_bucket_name()
+    files = []  # Список файлов для отправки в OpenAI
     api_messages = []
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
@@ -64,30 +64,31 @@ def chatgpt_analyze(prompt, messages):
                     json.dumps(message_data, ensure_ascii=False)
                 )
     
-        """# Проверяем наличие s3_key и скачиваем файл
+        # Проверяем наличие s3_key и скачиваем файл
         if "s3_key" in msg and msg["s3_key"]:
             try:
                 file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
-                api_messages.append({
-                    "role": "user",
-                    "content": f"Файл доступен по ссылке: {file_url}",
+                files.append({
+                    "url": file_url
                 })
-                #logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
-                #file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
-                #files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
+                logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
+                file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
+                files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
             except Exception as e:
-                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")"""
+                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
 
     logging.info("Начало проведения анализа")
 
-    messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
+    messages = [{"role": "system", "content": prompt}, 
+                {"role": "user", "content": [{"type": "text", "text": f"{api_messages}"}, 
+                {"type": "image_url", "image_url": files}                                                                    
+                                                        ]} ]
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(
             model="gpt-4o",  # Убедитесь, что используете правильную модель
             messages=messages
         )
-
         # Получение результата анализа
         analysis = response.choices[0].message.content
         tokens_input = response.usage.prompt_tokens  # Токены на отправку
