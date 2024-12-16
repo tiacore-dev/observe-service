@@ -5,37 +5,33 @@ from openai import AsyncOpenAI
 
 async def chatgpt_analyze_async(prompt, messages):
     """
-    Запускает анализ набора сообщений через OpenAI API с возможностью отправки изображений.
-
-    :param prompt: Текст системного промпта.
-    :param messages: Список сообщений (JSON), включая ссылки на изображения.
-    :return: Результат анализа и количество использованных токенов.
+    Запускает анализ набора сообщений через OpenAI API.
     """
     logging.info(f"Начало анализа набора сообщений.")
 
     api_messages = []
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
-                message_data = {
-                    "user_id": msg.get("user_id", "Неизвестно"),
-                    "chat_id": msg.get("chat_id", "Неизвестно"),
-                    "timestamp": msg.get("timestamp", "Неизвестно"),
-                    "text": msg.get("text", "Пустое сообщение"),
-                }
-                # Добавляем сообщение как JSON
-                api_messages.append(
-                    json.dumps(message_data, ensure_ascii=False)
-                )
-    
+            message_data = {
+                "user_id": msg.get("user_id", "Неизвестно"),
+                "chat_id": msg.get("chat_id", "Неизвестно"),
+                "timestamp": msg.get("timestamp", "Неизвестно"),  # Убедитесь, что timestamp строка
+                "text": msg.get("text", "Пустое сообщение"),
+            }
+            api_messages.append(json.dumps(message_data, ensure_ascii=False))
 
     logging.info("Начало проведения анализа")
 
-    messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
+    # Формируем правильный запрос
     try:
+        messages_payload = [{"role": "system", "content": prompt}]
+        for msg in api_messages:
+            messages_payload.append({"role": "user", "content": msg})
+
         # Вызов OpenAI API
         response = await AsyncOpenAI.chat.completions.create(
-            model="gpt-4o",  # Убедитесь, что используете правильную модель
-            messages=messages
+            model="gpt-4",  # Убедитесь, что используете правильную модель
+            messages=messages_payload
         )
 
         # Получение результата анализа

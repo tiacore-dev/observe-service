@@ -58,6 +58,10 @@ async def execute_analysis_and_send(chat_id, analysis_time):
 
         logging.info(f"Диапазон анализа: {analysis_start} - {analysis_end}")
 
+        # Убедимся, что анализируемый диапазон используется правильно
+        if not isinstance(analysis_start, datetime) or not isinstance(analysis_end, datetime):
+            raise ValueError("analysis_start и analysis_end должны быть объектами datetime.")
+
         messages = message_manager.get_filtered_messages(
             start_date=analysis_start,
             end_date=analysis_end,
@@ -82,6 +86,7 @@ async def execute_analysis_and_send(chat_id, analysis_time):
         logging.info(f"Анализ для чата {chat_id} успешно выполнен и отправлен.")
     except Exception as e:
         logging.error(f"Ошибка при выполнении анализа для чата {chat_id}: {e}")
+
 
 
 
@@ -135,6 +140,7 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         'cron',
         hour=send_time.hour,
         minute=send_time.minute,
+        seconds=0,
         args=[chat_id, analysis_time],
         id=job_id,
         replace_existing=True
