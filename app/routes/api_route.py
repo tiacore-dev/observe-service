@@ -24,10 +24,10 @@ def get_messages():
 
     try:
         # Преобразуем start_date и end_date, добавляя время, если нужно
-        if start_date:
+        if start_date and isinstance(start_date, str):
             start_date = datetime.strptime(start_date, "%Y-%m-%d")
             start_date = start_date.replace(hour=0, minute=0, second=0)
-        if end_date:
+        if end_date and isinstance(end_date, str):
             end_date = datetime.strptime(end_date, "%Y-%m-%d")
             end_date = end_date.replace(hour=23, minute=59, second=59)
 
@@ -71,11 +71,12 @@ def get_all_messages_for_analysis():
 
     from app.database.managers.message_manager import MessageManager
     manager = MessageManager()
+
     # Преобразуем start_date и end_date, добавляя время, если нужно
-    if start_date:
+    if start_date and isinstance(start_date, str):
         start_date = datetime.strptime(start_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
-    if end_date:
+    if end_date and isinstance(end_date, str):
         end_date = datetime.strptime(end_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
 
@@ -86,6 +87,7 @@ def get_all_messages_for_analysis():
     except Exception as e:
         logging.error(f"Ошибка при получении сообщений для анализа: {str(e)}")
         return jsonify({'error': 'Не удалось получить сообщения для анализа'}), 500
+
 
 
 @api_bp.route('/api/users', methods=['GET'])
