@@ -80,7 +80,7 @@ class MessageManager:
         if start_date:
             if isinstance(start_date, str):
                 try:
-                    start_date_parsed = isoparse(start_date)  # Используем isoparse для строк с временными зонами
+                    start_date_parsed = isoparse(start_date)  # Поддержка ISO-строк
                 except ValueError as e:
                     raise ValueError(f"Некорректный формат start_date: {start_date}") from e
             elif isinstance(start_date, datetime):
@@ -92,7 +92,7 @@ class MessageManager:
         if end_date:
             if isinstance(end_date, str):
                 try:
-                    end_date_parsed = isoparse(end_date)  # Используем isoparse для строк с временными зонами
+                    end_date_parsed = isoparse(end_date)  # Поддержка ISO-строк
                 except ValueError as e:
                     raise ValueError(f"Некорректный формат end_date: {end_date}") from e
             elif isinstance(end_date, datetime):
@@ -114,3 +114,4 @@ class MessageManager:
         query = query.order_by(Message.timestamp.desc()).limit(limit).offset(offset)
 
         return query.all(), total_count
+

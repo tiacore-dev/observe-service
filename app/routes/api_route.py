@@ -48,6 +48,7 @@ def get_messages():
         return jsonify({'error': 'Failed to fetch messages'}), 500
 
 
+
 @api_bp.route('/api/analyze', methods=['GET'])
 @jwt_required()
 def get_all_messages_for_analysis():
