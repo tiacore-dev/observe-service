@@ -98,7 +98,7 @@ def chatgpt_analyze(prompt, messages):
                 logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")
 
     logging.info("Начало проведения анализа")
-    api_messages = {"type": "text", "text": f"{api_messages}"}
+    api_messages = json.dumps({"type": "text", "text": f"{api_messages}"})
     """messages = [{"role": "system", "content": prompt}, 
                 {"role": "user", "content": [{"type": "text", "text": f"{api_messages}"}, 
                 {"type": "image_url"}                                                                    
