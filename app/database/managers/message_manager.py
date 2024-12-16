@@ -78,12 +78,28 @@ class MessageManager:
 
         # Фильтры
         if start_date:
-            start_date_parsed = datetime.strptime(start_date, "%Y-%m-%d")
+            if isinstance(start_date, str):
+                try:
+                    start_date_parsed = isoparse(start_date)  # Используем isoparse для строк с временными зонами
+                except ValueError as e:
+                    raise ValueError(f"Некорректный формат start_date: {start_date}") from e
+            elif isinstance(start_date, datetime):
+                start_date_parsed = start_date
+            else:
+                raise ValueError("start_date должен быть строкой в формате ISO 8601 или datetime.")
             query = query.filter(Message.timestamp >= start_date_parsed)
 
         if end_date:
-            end_date_parsed = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
-            query = query.filter(Message.timestamp < end_date_parsed)
+            if isinstance(end_date, str):
+                try:
+                    end_date_parsed = isoparse(end_date)  # Используем isoparse для строк с временными зонами
+                except ValueError as e:
+                    raise ValueError(f"Некорректный формат end_date: {end_date}") from e
+            elif isinstance(end_date, datetime):
+                end_date_parsed = end_date
+            else:
+                raise ValueError("end_date должен быть строкой в формате ISO 8601 или datetime.")
+            query = query.filter(Message.timestamp <= end_date_parsed)
 
         if user_id:
             query = query.filter(Message.user_id == int(user_id))

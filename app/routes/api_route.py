@@ -5,7 +5,7 @@ import logging
 api_bp = Blueprint('api', __name__)
 
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 @api_bp.route('/api/messages', methods=['GET'])
 @jwt_required()
@@ -23,14 +23,6 @@ def get_messages():
     manager = MessageManager()
 
     try:
-        # Преобразуем start_date и end_date, добавляя время, если нужно
-        if start_date and isinstance(start_date, str):
-            start_date = datetime.strptime(start_date, "%Y-%m-%d")
-            start_date = start_date.replace(hour=0, minute=0, second=0)
-        if end_date and isinstance(end_date, str):
-            end_date = datetime.strptime(end_date, "%Y-%m-%d")
-            end_date = end_date.replace(hour=23, minute=59, second=59)
-
         # Рассчитываем limit и offset
         offset = (page - 1) * page_size
         limit = page_size
