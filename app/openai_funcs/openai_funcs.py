@@ -69,19 +69,16 @@ def chatgpt_analyze(prompt, messages):
             try:
                 logging.info(f"Создание ссылки по ключу: {msg['s3_key']}")
                 file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
-                """files.append({
-                    "url": file_url
-                })"""
                 file_data = {
                     "type": "image_url",
-                    "image_url": f"{file_url}"
+                    "image_url": {"url": f"{file_url}"}
                 }
                 message_data = {
                     "user_id": msg.get("user_id", "Неизвестно"),
                     "chat_id": msg.get("chat_id", "Неизвестно"),
                     "timestamp": msg.get("timestamp", "Неизвестно"),
                     "text": msg.get("text", "Пустое сообщение"),
-                    "Ссылка на изображение": file_url
+                    #"Ссылка на изображение": file_url
                 }
                 # Добавляем сообщение как JSON
                 api_messages.append(
