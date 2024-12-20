@@ -2,6 +2,7 @@ import openai
 from io import BytesIO
 import logging
 import json
+from app.utils.db_get import get_chat_name, get_user_name
 
 
 
@@ -46,57 +47,26 @@ def chatgpt_analyze(prompt, messages):
     """
     logging.info(f"Начало анализа набора сообщений.")
 
-    #from app.s3 import get_s3_manager, get_bucket_name
-    #s3_manager = get_s3_manager()
-    #bucket_name = get_bucket_name()
     api_messages = []
-    #files=[]
+
     for msg in messages:
         if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
-                message_data = {
-                    "user_id": msg.get("user_id", "Неизвестно"),
-                    "chat_id": msg.get("chat_id", "Неизвестно"),
-                    "timestamp": msg.get("timestamp", "Неизвестно"),
-                    "text": msg.get("text", "Пустое сообщение"),
-                }
-                # Добавляем сообщение как JSON
-                api_messages.append(
-                    json.dumps(message_data, ensure_ascii=False)
-                )
-    
-        """# Проверяем наличие s3_key и скачиваем файл
-        if "s3_key" in msg and msg["s3_key"]:
-            try:
-                logging.info(f"Создание ссылки по ключу: {msg['s3_key']}")
-                file_url = s3_manager.generate_presigned_url(bucket_name, msg['s3_key'])
-                file_data = {
-                    "type": "image_url",
-                    "image_url": {"url": f"{file_url}"}
-                }
-                message_data = {
-                    "type": "text", "text": {
-                    "user_id": msg.get("user_id", "Неизвестно"),
-                    "chat_id": msg.get("chat_id", "Неизвестно"),
-                    "timestamp": msg.get("timestamp", "Неизвестно"),
-                    "text": msg.get("text", "Пустое сообщение"),
-                    #"Ссылка на изображение": file_url
-                }}
-                # Добавляем сообщение как JSON
-                api_messages.append(
-                    json.dumps(message_data, ensure_ascii=False)
-                )
+                
+                user = get_user_name(msg.get("user_id"))
+                chat = get_chat_name(msg.get("chat_id"))
 
+                message_data = {
+                    "user": user,
+                    "chat": chat,
+                    "timestamp": msg.get("timestamp", "Неизвестно"),
+                    "text": msg.get("text", "Пустое сообщение"),
+                }
+                # Добавляем сообщение как JSON
                 api_messages.append(
-                    json.dumps(file_data, ensure_ascii=False)
+                    json.dumps(message_data, ensure_ascii=False)
                 )
-                #logging.info(f"Скачивание изображения из S3: {msg['s3_key']}")
-                #file_content = s3_manager.get_file(bucket_name, msg['s3_key'])
-                #files.append(("file", (msg["s3_key"], file_content, "application/octet-stream")))
-            except Exception as e:
-                logging.warning(f"Не удалось скачать файл {msg['s3_key']}: {e}")"""
 
     logging.info("Начало проведения анализа")
-    #api_messages = [{"type": "text", "text": f"{api_messages}"}, files]
     messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
     try:
         # Вызов OpenAI API
