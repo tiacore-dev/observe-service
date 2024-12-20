@@ -9,6 +9,9 @@ load_dotenv()
 bot_token = os.getenv('TG_API_TOKEN')
 bot = Bot(bot_token)
 chat_id = os.getenv('CHAT_ID')
+from aiogram import Dispatcher, executor
+
+dp = Dispatcher(bot)
 
 def add_text(message, text, db_u, db):
     user_id = message.get('user_id')
@@ -136,3 +139,6 @@ async def send_analysis_result(analysis_text, chat_name):
         logging.error(f"Ошибка при отправке сообщения в чат {chat_id}: {e}")
 
 
+
+if __name__ == "__main__":
+    executor.start_polling(dp, skip_updates=True)

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 from app.utils import parse_time
+from app.utils.tg_db import sync_chats_from_messages, update_usernames
 
 chats_bp = Blueprint('chats', __name__)
 
@@ -60,3 +61,14 @@ def update_schedule(chat_id):
 
 
 
+@chats_bp.route('/api/chats/update', methods=['GET'])
+@jwt_required()
+def update_chats():
+    try:
+        sync_chats_from_messages()
+        update_usernames()
+        logging.info("Чаты успешно обновлены.")
+        return {"msg": "Chats updated succsessfully"}, 200
+    except Exception as e:
+        logging.error(f"Возникла ошибка при обновлении чато^ {e}.")
+        return {"msg": f"Error during updating chats: {e}"}, 500

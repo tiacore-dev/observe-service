@@ -164,4 +164,22 @@ $(document).ready(function () {
             },
         });
     }
+
+        // Обработчик для отдельной кнопки
+    $('#updateRouteButton').on('click', function () {
+        $.ajax({
+            url: '/api/chats/update', // Роут для обновления
+            type: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            contentType: 'application/json',
+            success: function (response) {
+                console.log('Данные чатов успешно обновлены:', response);
+                alert('Данные чатов успешно обновлены.');
+            },
+            error: function (xhr) {
+                console.error('Ошибка обновления данных чатов:', xhr.responseJSON?.error || xhr.statusText);
+                alert(xhr.responseJSON?.error || 'Ошибка обновления данных чатов.');
+            },
+        });
+    });
 });
