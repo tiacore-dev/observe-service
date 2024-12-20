@@ -7,7 +7,7 @@ from .analysis_route import analysis_bp
 from .gateway_routes import gateway_bp
 from .chats_route import chats_bp
 from .api_route import api_bp
-
+from .users_route import users_bp
 
 
 
@@ -21,4 +21,5 @@ def register_routes(app: Flask):
     app.register_blueprint(gateway_bp)
     app.register_blueprint(chats_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(users_bp)
 

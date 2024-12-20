@@ -72,7 +72,7 @@ def update_chats():
         bot_token = os.getenv('TG_API_TOKEN')
         bot = telebot.TeleBot(bot_token)
         sync_chats_from_messages(bot)
-        update_usernames(bot)
+        #update_usernames(bot)
         bot.stop_bot() 
         logging.info("Чаты успешно обновлены.")
         return {"msg": "Chats updated succsessfully"}, 200
