@@ -175,6 +175,7 @@ $(document).ready(function () {
             success: function (response) {
                 console.log('Данные чатов успешно обновлены:', response);
                 alert('Данные чатов успешно обновлены.');
+                loadChats();
             },
             error: function (xhr) {
                 console.error('Ошибка обновления данных чатов:', xhr.responseJSON?.error || xhr.statusText);

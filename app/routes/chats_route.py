@@ -61,7 +61,7 @@ def update_schedule(chat_id):
 
 
 
-@chats_bp.route('/api/chats/update', methods=['GET'])
+@chats_bp.route('/api/chats/update', methods=['POST'])
 @jwt_required()
 def update_chats():
     try:
