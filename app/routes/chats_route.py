@@ -65,8 +65,15 @@ def update_schedule(chat_id):
 @jwt_required()
 def update_chats():
     try:
-        sync_chats_from_messages()
-        update_usernames()
+        import os
+        from dotenv import load_dotenv
+        import telebot
+        load_dotenv()
+        bot_token = os.getenv('TG_API_TOKEN')
+        bot = telebot.TeleBot(bot_token)
+        sync_chats_from_messages(bot)
+        update_usernames(bot)
+        bot.stop_bot() 
         logging.info("Чаты успешно обновлены.")
         return {"msg": "Chats updated succsessfully"}, 200
     except Exception as e:
