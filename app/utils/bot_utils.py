@@ -11,7 +11,7 @@ bot_token = os.getenv('TG_API_TOKEN')
 bot = Bot(bot_token)
 chat_id = os.getenv('CHAT_ID')
 
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 def add_text(message, text, db_u, db):
     user_id = message.get('user_id')
@@ -75,8 +75,14 @@ async def send_analysis_result(analysis_text, chat_name):
 
 
 
+# Основной цикл
 async def main():
-    await dp.start_polling(bot)
+    logging.basicConfig(level=logging.INFO)
+    try:
+        # Запускаем диспетчер
+        await dp.start_polling(bot)
+    except Exception as e:
+        logging.error(f"Ошибка при запуске бота: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
