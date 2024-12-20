@@ -2,6 +2,8 @@ $(document).ready(function () {
     const token = localStorage.getItem('access_token');
     let offset = 0;
     const limit = 10;
+    let currentPage = 1;
+    let totalPages = 1;
 
     if (!token) {
         window.location.href = '/';
@@ -54,7 +56,7 @@ $(document).ready(function () {
                 });
     
                 $('.clickable-row').off('click').on('click', function () {
-                    const analysisId = $(this).attr('data-analysis-id'); // Используем .attr() вместо .data()
+                    const analysisId = $(this).attr('data-analysis-id');
                     if (analysisId) {
                         window.location.href = `/analysis/${analysisId}/view`;
                     } else {
@@ -62,6 +64,9 @@ $(document).ready(function () {
                         alert('Ошибка: ID анализа не найден.');
                     }
                 });
+
+                // Обновляем информацию о пагинации
+                updatePagination(response.total_count);
             },
             error: function () {
                 $('#loadingIndicator').hide();
@@ -69,5 +74,27 @@ $(document).ready(function () {
             }
         });
     }
-    
+
+    function updatePagination(totalCount) {
+        totalPages = Math.ceil(totalCount / limit);
+        $('#pageInfo').text(`Страница ${currentPage} из ${totalPages}`);
+        $('#prevPage').prop('disabled', currentPage === 1);
+        $('#nextPage').prop('disabled', currentPage === totalPages);
+    }
+
+    $('#prevPage').on('click', function () {
+        if (currentPage > 1) {
+            currentPage--;
+            offset -= limit;
+            loadAnalyses();
+        }
+    });
+
+    $('#nextPage').on('click', function () {
+        if (currentPage < totalPages) {
+            currentPage++;
+            offset += limit;
+            loadAnalyses();
+        }
+    });
 });
