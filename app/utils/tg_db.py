@@ -57,12 +57,12 @@ def update_usernames(bot):
             if user_info.last_name:
                 username += f" {user_info.last_name}"
             
-            # Проверяем, нужно ли обновить имя
+            """# Проверяем, нужно ли обновить имя
             if user.username != username:
                 db.update_username(user.user_id, username)
                 logging.info(f"Имя пользователя {user.user_id} обновлено: '{user.username}' -> '{username}'.")
             else:
-                logging.info(f"Имя пользователя {user.user_id} актуально: '{user.username}'.")
+                logging.info(f"Имя пользователя {user.user_id} актуально: '{user.username}'.")"""
         except Exception as e:
             logging.warning(f"Не удалось обновить пользователя {user.user_id}: {e}")
 
