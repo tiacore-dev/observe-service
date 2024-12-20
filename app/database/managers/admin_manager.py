@@ -38,11 +38,15 @@ class AdminManager:
 
 
     def user_exists(self, user_id):
-        """Проверка существования пользователя по имени"""
+        """Проверка существования пользователя по логину"""
         session = self.Session()
-        exists_query = session.query(exists().where(Admin.login == user_id)).scalar()
-        session.close()
-        return exists_query
+        try:
+            # Используем exists с явной обработкой результата
+            exists_query = session.query(exists().where(Admin.login == user_id)).scalar()
+            return exists_query
+        finally:
+            session.close()
+
     
     
     def get_user_by_user_id(self, user_id):
