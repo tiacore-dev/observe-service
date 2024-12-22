@@ -158,10 +158,12 @@ def list_scheduled_jobs():
         logging.info(f"Job ID: {job.id}, trigger: {job.trigger}")
 
 def run_async_analysis_and_send(chat_id, analysis_time):
-    """
-    Обёртка для запуска асинхронной функции в синхронном контексте.
-    """
-    asyncio.run(execute_analysis_and_send(chat_id, analysis_time))
+    loop = asyncio.get_event_loop()
+    if loop.is_closed():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    loop.create_task(execute_analysis_and_send(chat_id, analysis_time))
+
 
 def remove_schedule_from_scheduler(chat_id):
     job_id = f"schedule_{chat_id}"

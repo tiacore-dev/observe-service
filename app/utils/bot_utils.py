@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 bot_token = os.getenv('TG_API_TOKEN')
-bot = Bot(bot_token)
+
 chat_id = os.getenv('CHAT_ID')
 
-dp = Dispatcher()
+
 
 def add_text(message, text, db_u, db):
     user_id = message.get('user_id')
@@ -66,23 +66,21 @@ def add_file(message, db_u, db, file_name):
 
 
 
-async def send_analysis_result(analysis_text, chat_name):
-    message_text = f"Получен анализ текста для чата {chat_name}. Текст анализа: {analysis_text}"
+async def send_analysis_result(analysis_text, chat_id, bot_token):
+    message_text = f"Получен анализ текста для чата {chat_id}. Текст анализа: {analysis_text}"
     try:
+        bot = Bot(bot_token)
+        dp = Dispatcher()
+
+        # Отправляем сообщение
         await bot.send_message(chat_id=chat_id, text=message_text)
     except Exception as e:
         logging.error(f"Ошибка при отправке сообщения в чат {chat_id}: {e}")
+    finally:
+        # Завершаем работу бота и диспетчера
+        await dp.storage.close()
+        await dp.storage.wait_closed()
+        await bot.session.close()
 
 
 
-# Основной цикл
-async def main():
-    logging.basicConfig(level=logging.INFO)
-    try:
-        # Запускаем диспетчер
-        await dp.start_polling(bot)
-    except Exception as e:
-        logging.error(f"Ошибка при запуске бота: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
