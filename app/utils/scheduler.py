@@ -158,11 +158,27 @@ def list_scheduled_jobs():
         logging.info(f"Job ID: {job.id}, trigger: {job.trigger}")
 
 def run_async_analysis_and_send(chat_id, analysis_time):
-    loop = asyncio.get_event_loop()
-    if loop.is_closed():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    loop.create_task(execute_analysis_and_send(chat_id, analysis_time))
+    try:
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():  # Если event loop закрыт, создаём новый
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+        except RuntimeError:  # Если в текущем потоке нет event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        # Запуск асинхронной задачи
+        loop.run_until_complete(execute_analysis_and_send(chat_id, analysis_time))
+    except Exception as e:
+        logging.exception(f"Ошибка выполнения асинхронной задачи для чата {chat_id}: {e}")
+    finally:
+        # Закрытие event loop для предотвращения утечек
+        if loop.is_running():
+            loop.stop()
+        loop.close()
+
+
 
 
 def remove_schedule_from_scheduler(chat_id):
