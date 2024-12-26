@@ -66,7 +66,7 @@ def add_file(message, db_u, db, file_name):
 
 
 
-async def send_analysis_result(analysis_text, chat_id, bot_token):
+async def send_analysis_result(analysis_text, chat_id):
     message_text = f"Получен анализ текста для чата {chat_id}. Текст анализа: {analysis_text}"
     try:
         bot = Bot(bot_token)
