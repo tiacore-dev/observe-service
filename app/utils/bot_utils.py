@@ -2,8 +2,7 @@ from datetime import datetime
 import logging
 import os
 from dotenv import load_dotenv
-from aiogram import Bot, Dispatcher
-
+import telebot
 
 load_dotenv()
 
@@ -68,19 +67,16 @@ def add_file(message, db_u, db, file_name):
             f"Ошибка при записи сообщения от пользователя {user_id}: {e}")
 
 
-async def send_analysis_result(analysis_text, chat_id):
-    message_text = f"Получен анализ текста для чата {
-        chat_id}. Текст анализа: {analysis_text}"
-    bot = Bot(bot_token)
-    dp = Dispatcher()
+def send_analysis_result(analysis_text, chat_id):
+    message_text = f"""Получен анализ текста для чата {
+        chat_id}. Текст анализа: {analysis_text}"""
+    bot = telebot.TeleBot(bot_token)
     try:
 
         # Отправляем сообщение
-        await bot.send_message(chat_id=chat_id, text=message_text)
+        bot.send_message(chat_id=chat_id, text=message_text)
     except Exception as e:
         logging.error(f"Ошибка при отправке сообщения в чат {chat_id}: {e}")
     finally:
         # Завершаем работу бота и диспетчера
-        await dp.storage.close()
-        await dp.storage.wait_closed()
-        await bot.session.close()
+        bot.stop_bot()
