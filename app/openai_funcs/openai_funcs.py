@@ -1,10 +1,8 @@
-import openai
-from io import BytesIO
 import logging
 import json
+from io import BytesIO
+import openai
 from app.utils.db_get import get_chat_name, get_user_name
-
-
 
 
 # Класс NamedBytesIO с именем
@@ -12,6 +10,7 @@ class NamedBytesIO(BytesIO):
     def __init__(self, initial_bytes, name):
         super().__init__(initial_bytes)
         self.name = name
+
 
 # Транскрибация аудио
 def transcribe_audio(audio, file_format):
@@ -50,24 +49,26 @@ def chatgpt_analyze(prompt, messages):
     api_messages = []
 
     for msg in messages:
-        if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
-                
-                user = get_user_name(msg.get("user_id"))
-                chat = get_chat_name(msg.get("chat_id"))
+        # Учитываем только сообщения с текстом
+        if "text" in msg and msg["text"]:
 
-                message_data = {
-                    "user": user,
-                    "chat": chat,
-                    "timestamp": msg.get("timestamp", "Неизвестно"),
-                    "text": msg.get("text", "Пустое сообщение"),
-                }
-                # Добавляем сообщение как JSON
-                api_messages.append(
-                    json.dumps(message_data, ensure_ascii=False)
-                )
+            user = get_user_name(msg.get("user_id"))
+            chat = get_chat_name(msg.get("chat_id"))
+
+            message_data = {
+                "user": user,
+                "chat": chat,
+                "timestamp": msg.get("timestamp", "Неизвестно"),
+                "text": msg.get("text", "Пустое сообщение"),
+            }
+            # Добавляем сообщение как JSON
+            api_messages.append(
+                json.dumps(message_data, ensure_ascii=False)
+            )
 
     logging.info("Начало проведения анализа")
-    messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
+    messages = [{"role": "system", "content": prompt},
+                {"role": "user", "content": f"{api_messages}"}]
     try:
         # Вызов OpenAI API
         response = openai.chat.completions.create(

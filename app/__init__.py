@@ -1,18 +1,19 @@
+import logging
+import os
+from datetime import timedelta
+import telebot
+from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
+from set_admin import set_admin
 from app.database import init_db, set_db_globals
 from app.s3 import init_s3_manager
-from datetime import timedelta
-import logging
-import openai
 from app.routes import register_routes
-import os
-from dotenv import load_dotenv
 from app.openai_funcs import init_openai
-from werkzeug.middleware.proxy_fix import ProxyFix
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
 from app.utils.scheduler import start_scheduler, clear_existing_jobs
-import telebot
+
 
 # Настройка логирования
 logging.basicConfig(
@@ -23,17 +24,10 @@ logging.basicConfig(
         logging.StreamHandler()  # Вывод в консоль
     ]
 )
-# Настраиваем логирование
-"""logging.basicConfig(
-    level=logging.DEBUG,  # Устанавливаем уровень DEBUG
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),  # Логи будут выводиться в консоль
-        logging.FileHandler('debug.log')  # Логи также сохраняются в файл debug.log
-    ]
-)"""
+
 
 load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
@@ -52,30 +46,39 @@ def create_app():
         database_url = os.getenv('DATABASE_URL')
         engine, Session, Base = init_db(database_url)
         set_db_globals(engine, Session, Base)
+        set_admin()
         logging.info("База данных успешно инициализирована.")
     except Exception as e:
         logging.error(f"Ошибка при инициализации базы данных: {e}")
         raise
 
     # Инициализация бота
-    bot_token = os.getenv('TG_API_TOKEN')
-    bot = telebot.TeleBot(bot_token)
-    sync_chats_from_messages(bot)
-    update_usernames(bot)
-    bot.stop_bot() 
+    try:
+        bot_token = os.getenv('TG_API_TOKEN')
+        bot = telebot.TeleBot(bot_token)
+        logging.info("Бот успешно инициализирован")
+        sync_chats_from_messages(bot)
+        update_usernames(bot)
+        bot.stop_bot()
+        logging.info("Бот успешно выполнил задачи и остановлен")
+    except Exception as e:
+        logging.error(f"Ошибка при инициализации бота: {e}")
+        raise
 
     # Инициализация JWT
     try:
-        app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') 
-        jwt = JWTManager(app)
-        app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1) 
-        logging.info(f"JWT инициализирован. {app.config['JWT_ACCESS_TOKEN_EXPIRES']}")
+        app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+        JWTManager(app)
+        app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+        logging.info(f"""JWT инициализирован. {
+                     app.config['JWT_ACCESS_TOKEN_EXPIRES']}""")
     except Exception as e:
         logging.error(f"Ошибка при инициализации JWT: {e}")
         raise
-    app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY') 
+
     # Инициализация OpenAI
     try:
+        app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
         init_openai(app)
         logging.info("OpenAI успешно инициализирован.")
     except Exception as e:
@@ -89,7 +92,7 @@ def create_app():
     except Exception as e:
         logging.error(f"Ошибка при инициализации S3: {e}")
         raise
-    
+
     try:
         clear_existing_jobs()
         start_scheduler()
@@ -97,6 +100,7 @@ def create_app():
     except Exception as e:
         logging.error(f"Ошибка при инициализации менеджера расписаний: {e}")
         raise
+
     # Регистрация маршрутов
     try:
         register_routes(app)
@@ -104,5 +108,5 @@ def create_app():
     except Exception as e:
         logging.error(f"Ошибка при регистрации маршрутов: {e}")
         raise
- 
+
     return app

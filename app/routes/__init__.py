@@ -10,10 +10,8 @@ from .api_route import api_bp
 from .users_route import users_bp
 
 
-
-
 def register_routes(app: Flask):
-    app.register_blueprint(login_bp)  
+    app.register_blueprint(login_bp)
     app.register_blueprint(account_bp)
     app.register_blueprint(prompt_bp)
     app.register_blueprint(logs_bp)
@@ -22,4 +20,3 @@ def register_routes(app: Flask):
     app.register_blueprint(chats_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(users_bp)
-

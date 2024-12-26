@@ -1,8 +1,9 @@
+import logging
+from sqlalchemy import text
 from app.database.models.chat import Chat
 from app.database.db_globals import Session
-from sqlalchemy import text
 from app.utils import parse_time
-import logging
+
 
 class ChatManager:
     def __init__(self):
@@ -23,7 +24,6 @@ class ChatManager:
             raise e
         finally:
             session.close()
-
 
     def get_chat_by_id(self, chat_id):
         session = self.Session()
@@ -53,7 +53,6 @@ class ChatManager:
             return session.query(Chat).all()
         finally:
             session.close()
-
 
     def update_schedule(self, chat_id, schedule_analysis, prompt_id=None, analysis_time=None, send_time=None):
         """

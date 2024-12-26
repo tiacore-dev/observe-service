@@ -1,10 +1,9 @@
-from app.database.models.analysis import AnalysisResult
-from app.database.db_globals import Session
-import uuid
-from datetime import datetime
-from app.utils.db_get import get_prompt_name
 import logging
 import json
+from app.database.models.analysis import AnalysisResult
+from app.database.db_globals import Session
+from app.utils.db_get import get_prompt_name
+
 
 class AnalysisManager:
     def __init__(self):
@@ -28,19 +27,21 @@ class AnalysisManager:
         finally:
             session.close()
 
-
     def get_analysis_all(self, offset=0, limit=10):
         session = self.Session()
         try:
             analyses = (
                 session.query(AnalysisResult)
-                .order_by(AnalysisResult.timestamp.desc())  # Сортировка по времени
+                # Сортировка по времени
+                .order_by(AnalysisResult.timestamp.desc())
                 .offset(offset)
                 .limit(limit)
                 .all()
             )
-            total_count = session.query(AnalysisResult).count()  # Общее количество записей
-            logging.info(f"Найдено {total_count} анализов, возвращаем {len(analyses)} начиная с {offset}")
+            # Общее количество записей
+            total_count = session.query(AnalysisResult).count()
+            logging.info(f"""Найдено {total_count} анализов, возвращаем {
+                         len(analyses)} начиная с {offset}""")
             result = [
                 {
                     'analysis_id': analysis.analysis_id,
@@ -59,27 +60,30 @@ class AnalysisManager:
         finally:
             session.close()
 
-
     def get_analysis_by_id(self, analysis_id):
         session = self.Session()
         try:
-            analysis = session.query(AnalysisResult).filter_by(analysis_id=analysis_id).first()
+            analysis = session.query(AnalysisResult).filter_by(
+                analysis_id=analysis_id).first()
             if analysis:
                 try:
                     # Десериализация фильтров
-                    filters = json.loads(analysis.filters) if analysis.filters else None
+                    filters = json.loads(
+                        analysis.filters) if analysis.filters else None
                 except json.JSONDecodeError:
                     filters = "Некорректные данные"
 
                 # Преобразование фильтров в читаемый формат
                 filters_readable = (
-                    ", ".join([f"{key}: {value}" for key, value in filters.items()]) if isinstance(filters, dict) else filters
+                    ", ".join([f"{key}: {value}" for key, value in filters.items()]) if isinstance(
+                        filters, dict) else filters
                 )
 
                 return {
                     'analysis_id': analysis.analysis_id,
                     'prompt_id': analysis.prompt_id,
-                    'prompt_name': get_prompt_name(analysis.prompt_id),  # Название промпта
+                    # Название промпта
+                    'prompt_name': get_prompt_name(analysis.prompt_id),
                     'timestamp': analysis.timestamp.isoformat(),
                     'result_text': analysis.result_text,
                     'filters': filters_readable or 'Не указаны',
@@ -92,5 +96,3 @@ class AnalysisManager:
             raise e
         finally:
             session.close()
-
-

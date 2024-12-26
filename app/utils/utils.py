@@ -1,5 +1,6 @@
 from datetime import datetime, time
 
+
 def parse_time(time_input):
     """
     Парсит строку или объект времени в объект time, поддерживая форматы с и без секунд.

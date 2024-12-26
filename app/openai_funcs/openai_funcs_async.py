@@ -5,6 +5,7 @@ from datetime import datetime
 
 client = AsyncOpenAI()
 
+
 async def chatgpt_analyze_async(prompt, messages):
     """
     Запускает анализ набора сообщений через OpenAI API.
@@ -13,7 +14,8 @@ async def chatgpt_analyze_async(prompt, messages):
 
     api_messages = []
     for msg in messages:
-        if "text" in msg and msg["text"]:  # Учитываем только сообщения с текстом
+        # Учитываем только сообщения с текстом
+        if "text" in msg and msg["text"]:
             message_data = {
                 "user_id": msg.get("user_id", "Неизвестно"),
                 "chat_id": msg.get("chat_id", "Неизвестно"),
@@ -26,7 +28,8 @@ async def chatgpt_analyze_async(prompt, messages):
 
     # Формируем правильный запрос
     try:
-        messages = [{"role": "system", "content": prompt}, {"role": "user", "content": f"{api_messages}"}]
+        messages = [{"role": "system", "content": prompt},
+                    {"role": "user", "content": f"{api_messages}"}]
 
         # Вызов OpenAI API
         response = await client.chat.completions.create(

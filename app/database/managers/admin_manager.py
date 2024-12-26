@@ -1,7 +1,8 @@
-from sqlalchemy import exists
-from app.database.models.admin import Admin  
-from app.database.db_globals import Session
 import uuid
+from sqlalchemy import exists
+from app.database.models.admin import Admin
+from app.database.db_globals import Session
+
 
 class AdminManager:
     def __init__(self):
@@ -36,19 +37,17 @@ class AdminManager:
             session.commit()
         session.close()
 
-
     def user_exists(self, user_id):
         """Проверка существования пользователя по логину"""
         session = self.Session()
         try:
             # Используем exists с явной обработкой результата
-            exists_query = session.query(exists().where(Admin.login == user_id)).scalar()
+            exists_query = session.query(
+                exists().where(Admin.login == user_id)).scalar()
             return exists_query
         finally:
             session.close()
 
-    
-    
     def get_user_by_user_id(self, user_id):
         session = self.Session()
         try:
@@ -60,8 +59,7 @@ class AdminManager:
 
         # Возвращаем найденного пользователя или None, если не найдено
         return user
-    
-        
+
     def delete_user(self, login):
         """Удаление пользователя по user_id"""
         session = self.Session()

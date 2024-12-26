@@ -1,19 +1,17 @@
+import os
+from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask import render_template
 from flask_jwt_extended import jwt_required
-import json
-import os
-from datetime import datetime
+
 
 logs_bp = Blueprint('logs', __name__)
 LOG_FILE_PATH = "app.log"  # Укажите путь к вашему лог-файлу
 
 
-@logs_bp.route('/logs')  
+@logs_bp.route('/logs')
 def logs_page():
     return render_template('logs.html')
-
-
 
 
 @logs_bp.route('/api/logs', methods=['GET'])
@@ -33,7 +31,7 @@ def get_logs():
 
     # Читаем и фильтруем логи
     try:
-        with open(LOG_FILE_PATH, "r") as log_file:
+        with open(LOG_FILE_PATH, "r", encoding="utf-8") as log_file:
             for line in log_file:
                 total_count += 1
                 if offset <= total_count <= offset + limit:
@@ -45,7 +43,6 @@ def get_logs():
 
     return jsonify({'total': total_count, 'logs': logs})
 
-from datetime import datetime
 
 def parse_log_entry(line, date=None):
     """
@@ -57,7 +54,8 @@ def parse_log_entry(line, date=None):
         log_date, log_level, message = parts[0], parts[1], parts[2]
 
         # Преобразуем дату логов в ISO-формат
-        log_date_iso = datetime.strptime(log_date, "%Y-%m-%d %H:%M:%S,%f").isoformat()
+        log_date_iso = datetime.strptime(
+            log_date, "%Y-%m-%d %H:%M:%S,%f").isoformat()
 
         log_entry = {
             "date": log_date_iso,  # Дата в ISO-формате

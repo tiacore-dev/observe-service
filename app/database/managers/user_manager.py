@@ -1,7 +1,8 @@
-from sqlalchemy import exists
-from app.database.models.user import User  
-from app.database.db_globals import Session
 import logging
+from sqlalchemy import exists
+from app.database.models.user import User
+from app.database.db_globals import Session
+
 
 class UserManager:
     def __init__(self):
@@ -19,10 +20,11 @@ class UserManager:
     def user_exists(self, user_id):
         """Проверка существования пользователя по имени"""
         session = self.Session()
-        exists_query = session.query(exists().where(User.user_id == user_id)).scalar()
+        exists_query = session.query(
+            exists().where(User.user_id == user_id)).scalar()
         session.close()
         return exists_query
-    
+
     def get_user_by_user_id(self, user_id):
         session = self.Session()
         try:
@@ -72,7 +74,8 @@ class UserManager:
             if user_in_db:
                 user_in_db.username = username
                 session.commit()
-                logging.info(f"Обновлено имя пользователя {user_id}: {username}")
+                logging.info(f"""Обновлено имя пользователя {
+                             user_id}: {username}""")
         except Exception as e:
             logging.error(f"Ошибка при редактировании имени пользователя: {e}")
             session.rollback()
