@@ -105,12 +105,12 @@ def create_app(config_name):
             logging.error(f"Ошибка при инициализации бота: {e}")
             raise
 
-    # Регистрация маршрутов
-    try:
-        register_routes(app)
-        logging.info("Маршруты успешно зарегистрированы.")
-    except Exception as e:
-        logging.error(f"Ошибка при регистрации маршрутов: {e}")
-        raise
+        # Регистрация маршрутов
+        try:
+            register_routes(app)
+            logging.info("Маршруты успешно зарегистрированы.")
+        except Exception as e:
+            logging.error(f"Ошибка при регистрации маршрутов: {e}")
+            raise
 
     return app
