@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     && update-ca-certificates \
-    && python3.12-distutils
+    && python3-distutils
 
 # Копируем файл зависимостей в рабочую директорию
 COPY requirements.txt .
