@@ -1,3 +1,11 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 class ConfigCelery:
-    CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Используем Redis для Celery
-    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+    redis_port = os.getenv('REDIS_PORT')
+    # Используем Redis для Celery
+    CELERY_BROKER_URL = f'redis://localhost:{redis_port}/0'
+    CELERY_RESULT_BACKEND = f'redis://localhost:{redis_port}/0'

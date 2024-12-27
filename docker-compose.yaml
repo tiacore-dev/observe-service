@@ -10,7 +10,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_PORT}:${REDIS_PORT}"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -25,7 +25,7 @@ services:
     command: >
       celery -A celery_worker:celery worker -l info -E
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:${REDIS_PORT}/0
 
     depends_on:    
       redis:
@@ -37,11 +37,11 @@ services:
 
   flower:
     build: .
-    command: celery -A celery_worker flower --address=0.0.0.0 --port=5555 --broker=redis://redis:6379
+    command: celery -A celery_worker flower --address=0.0.0.0 --port=5555 --broker=redis://redis:${REDIS_PORT}
     ports:
       - "${FLOWER_PORT}:5555"
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:${REDIS_PORT}/0
     depends_on:
       - redis
       - celery
@@ -65,6 +65,7 @@ services:
       - HTTPS_PROXY=
     depends_on:
       - alembic
+      - celery
     volumes:
       - .:/app
     command: gunicorn -c gunicorn.conf.py --worker-class eventlet -w 1 run:app
