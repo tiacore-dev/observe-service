@@ -34,7 +34,7 @@ def create_app():
     # Установка секретного ключа для сессий
     app.config['CELERY_BROKER_URL'] = os.getenv(
         'CELERY_BROKER_URL', 'redis://redis:6379/0')
-    app.config['CELERY_RESULT_BACKEND'] = os.getenv(
+    app.config['result_backend'] = os.getenv(
         'CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 
     app.wsgi_app = ProxyFix(
