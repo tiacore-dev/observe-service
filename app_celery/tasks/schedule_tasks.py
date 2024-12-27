@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime
 from pytz import timezone
-from celery import shared_task
+from celery import shared_task  # pylint disable=import-error
 from app.utils.db_get import get_prompt
 
 novosibirsk_tz = timezone('Asia/Novosibirsk')
