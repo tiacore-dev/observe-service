@@ -9,8 +9,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    sysctls:
+      vm.overcommit_memory: 1
     networks:
       - observer_network
+
 
   alembic:
     build: .
@@ -38,7 +41,9 @@ services:
 
   flower:
     build: .
-    command: celery -A celery_worker flower --address=0.0.0.0 --port=5555 --broker=redis://redis:6379
+    command: >
+      celery --broker=redis://redis:6379/0 flower --address=0.0.0.0 --port=5555 --inspect-timeout=10
+
     ports:
       - "${FLOWER_PORT}:5555"
     environment:
