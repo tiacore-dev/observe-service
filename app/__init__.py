@@ -32,7 +32,10 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     # Установка секретного ключа для сессий
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['CELERY_BROKER_URL'] = os.getenv(
+        'CELERY_BROKER_URL', 'redis://redis:6379/0')
+    app.config['CELERY_RESULT_BACKEND'] = os.getenv(
+        'CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
 
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
