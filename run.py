@@ -12,7 +12,7 @@ load_dotenv()
 port = os.getenv('FLASK_PORT', '5000')
 
 # Создаем приложение
-app = create_app()
+app = create_app('Development')
 
 # Запускаем приложение
 if __name__ == "__main__":

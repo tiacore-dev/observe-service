@@ -29,7 +29,7 @@ logging.basicConfig(
 load_dotenv()
 
 
-def create_app():
+def create_app(config_name):
     app = Flask(__name__)
     # Установка секретного ключа для сессий
     app.config['CELERY_BROKER_URL'] = os.getenv(
@@ -96,13 +96,15 @@ def create_app():
         logging.error(f"Ошибка при инициализации S3: {e}")
         raise
 
-    try:
-        clear_existing_jobs()
-        start_scheduler()
-        logging.info("Менеджер расписаний успешно инициализирован.")
-    except Exception as e:
-        logging.error(f"Ошибка при инициализации менеджера расписаний: {e}")
-        raise
+    if config_name == 'Development':
+        try:
+            clear_existing_jobs()
+            start_scheduler()
+            logging.info("Менеджер расписаний успешно инициализирован.")
+        except Exception as e:
+            logging.error(
+                f"Ошибка при инициализации менеджера расписаний: {e}")
+            raise
 
     # Регистрация маршрутов
     try:

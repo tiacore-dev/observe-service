@@ -5,7 +5,7 @@ from app_celery import create_celery_app
 
 print('RUNNING CELERY WORKER')
 
-flask_app = create_app()  # Создаем экземпляр Flask
+flask_app = create_app(config_name='Celery')  # Создаем экземпляр Flask
 celery = create_celery_app(flask_app)  # Создаем и связываем экземпляр Celery
 
 
