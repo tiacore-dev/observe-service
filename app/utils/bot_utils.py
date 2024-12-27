@@ -67,7 +67,7 @@ def add_file(message, db_u, db, file_name):
             f"Ошибка при записи сообщения от пользователя {user_id}: {e}")
 
 
-def send_analysis_result(analysis_text, chat_id):
+def send_analysis_result(analysis_text):
     message_text = f"""Получен анализ текста для чата {
         chat_id}. Текст анализа: {analysis_text}"""
     bot = telebot.TeleBot(bot_token)
