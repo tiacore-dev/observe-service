@@ -1,7 +1,7 @@
 services:
   alembic:
     build: .
-    command: alembic upgrade head      
+    command: alembic upgrade head
     volumes:
       - .:/app
     networks:
@@ -10,7 +10,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "${REDIS_PORT}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -19,15 +19,14 @@ services:
     networks:
       - observer_network
 
-
   celery:
     build: .
     command: >
-      celery -A celery_worker:celery worker -l info -E
-    #environment:
-      #- REDIS_URL=redis://redis:${REDIS_PORT}/0
-
-    depends_on:    
+      celery -A app_celery worker -l info -E
+    environment:
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_URL=redis://redis:${REDIS_PORT}/0
+    depends_on:
       redis:
         condition: service_healthy
     volumes:
@@ -37,10 +36,12 @@ services:
 
   flower:
     build: .
-    command: celery -A celery_worker flower --address=0.0.0.0 --port=5555 --broker=redis://redis:${REDIS_PORT}
+    command: >
+      celery -A app_celery flower --address=0.0.0.0 --port=5555 --broker=redis://redis:${REDIS_PORT}/0
     ports:
-      - "${FLOWER_PORT}:5555"
+      - "5555:5555"
     environment:
+      - REDIS_PORT=${REDIS_PORT}
       - REDIS_URL=redis://redis:${REDIS_PORT}/0
     depends_on:
       - redis
@@ -50,19 +51,18 @@ services:
     networks:
       - observer_network
 
-
   web:
+    build: .
     tty: true
     stdin_open: true
-    build: .
     dns:
       - 8.8.8.8
       - 8.8.4.4
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
     environment:
-      - HTTP_PROXY=
-      - HTTPS_PROXY=
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_URL=redis://redis:${REDIS_PORT}/0
     depends_on:
       - alembic
       - celery
@@ -71,7 +71,6 @@ services:
     command: gunicorn -c gunicorn.conf.py --worker-class eventlet -w 1 run:app
     networks:
       - observer_network
-
 
 networks:
   observer_network:
