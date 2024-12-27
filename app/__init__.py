@@ -55,19 +55,6 @@ def create_app(config_name):
         logging.error(f"Ошибка при инициализации базы данных: {e}")
         raise
 
-    # Инициализация бота
-    try:
-        bot_token = os.getenv('TG_API_TOKEN')
-        bot = telebot.TeleBot(bot_token)
-        logging.info("Бот успешно инициализирован")
-        sync_chats_from_messages(bot)
-        update_usernames(bot)
-        bot.stop_bot()
-        logging.info("Бот успешно выполнил задачи и остановлен")
-    except Exception as e:
-        logging.error(f"Ошибка при инициализации бота: {e}")
-        raise
-
     # Инициализация JWT
     try:
         app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
@@ -104,6 +91,18 @@ def create_app(config_name):
         except Exception as e:
             logging.error(
                 f"Ошибка при инициализации менеджера расписаний: {e}")
+            raise
+        # Инициализация бота
+        try:
+            bot_token = os.getenv('TG_API_TOKEN')
+            bot = telebot.TeleBot(bot_token)
+            logging.info("Бот успешно инициализирован")
+            sync_chats_from_messages(bot)
+            update_usernames(bot)
+            bot.stop_bot()
+            logging.info("Бот успешно выполнил задачи и остановлен")
+        except Exception as e:
+            logging.error(f"Ошибка при инициализации бота: {e}")
             raise
 
     # Регистрация маршрутов
