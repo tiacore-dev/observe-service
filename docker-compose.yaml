@@ -73,19 +73,6 @@ services:
     networks:
       - observer_network
 
-  init_password:
-    build: .
-    command: python password.py  # Запуск скрипта для добавления админа
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-    depends_on:
-      - alembic
-    networks:
-      - observer_network
-    volumes:
-      - .:/app
-
-
 
 networks:
   observer_network:
