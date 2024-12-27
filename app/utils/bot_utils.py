@@ -8,7 +8,7 @@ load_dotenv()
 
 bot_token = os.getenv('TG_API_TOKEN')
 
-chat_id = os.getenv('CHAT_ID')
+CHAT_ID = os.getenv('CHAT_ID')
 
 
 def add_text(message, text, db_u, db):
@@ -67,14 +67,14 @@ def add_file(message, db_u, db, file_name):
             f"Ошибка при записи сообщения от пользователя {user_id}: {e}")
 
 
-def send_analysis_result(analysis_text):
+def send_analysis_result(analysis_text, chat_id):
     message_text = f"""Получен анализ текста для чата {
         chat_id}. Текст анализа: {analysis_text}"""
     bot = telebot.TeleBot(bot_token)
     try:
 
         # Отправляем сообщение
-        bot.send_message(chat_id=chat_id, text=message_text)
+        bot.send_message(chat_id=CHAT_ID, text=message_text)
     except Exception as e:
         logging.error(f"Ошибка при отправке сообщения в чат {chat_id}: {e}")
     finally:
