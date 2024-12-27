@@ -63,6 +63,7 @@ services:
     environment:
       - HTTP_PROXY=
       - HTTPS_PROXY=
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - celery
       - alembic
