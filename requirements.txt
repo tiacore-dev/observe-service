@@ -17,3 +17,4 @@ celery==5.4.0
 eventlet==0.37.0
 flower==1.2.0
 redis==4.5.0
+setuptools==75.6.0
