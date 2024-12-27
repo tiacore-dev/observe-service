@@ -24,8 +24,8 @@ services:
     build: .
     command: >
       celery -A celery_worker:celery worker -l info -E
-    environment:
-      - REDIS_URL=redis://redis:${REDIS_PORT}/0
+    #environment:
+      #- REDIS_URL=redis://redis:${REDIS_PORT}/0
 
     depends_on:    
       redis:
