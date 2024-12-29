@@ -25,7 +25,7 @@ services:
   celery:
     build: .
     command: >
-      celery -A celery_worker:celery worker --pool=eventlet -l info -E
+      celery -A celery_worker:celery worker -l info -E
 
     environment:
       - REDIS_URL=redis://redis:6379/0
@@ -74,7 +74,7 @@ services:
     volumes:
       - .:/app
       - ./shared_temp:/shared_temp
-    command: gunicorn -c gunicorn.conf.py --worker-class eventlet --workers 2 --worker-connections 1000 run:app
+    command: gunicorn -c gunicorn.conf.py --worker-class eventlet -w 1 run:app
 
     networks:
       - observer_network
