@@ -39,6 +39,7 @@ def transcribe_audio(audio, file_format):
 
 @backoff.on_exception(
     backoff.expo,
+    (openai.OpenAIError, ConnectionError),  # Исправленный импорт
     max_tries=5,
     max_time=30  # Максимальное время ожидания
 )
@@ -50,7 +51,7 @@ def chatgpt_analyze(prompt, messages):
     :param messages: Список сообщений (JSON), включая ссылки на изображения.
     :return: Результат анализа и количество использованных токенов.
     """
-    logging.info(f"Начало анализа набора сообщений.")
+    logging.info("Начало анализа набора сообщений.")
 
     api_messages = []
 
