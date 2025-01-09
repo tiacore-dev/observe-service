@@ -1,17 +1,17 @@
 # app_celery/__init__.py
 
 from celery import Celery
-from config.config_celery import ConfigCelery
+from config import CeleryConfig
 
 
 def create_celery_app(flask_app=None):
     celery = Celery(
         __name__,
-        broker=ConfigCelery.CELERY_BROKER_URL,
-        backend=ConfigCelery.CELERY_RESULT_BACKEND
+        broker=CeleryConfig.CELERY_BROKER_URL,
+        backend=CeleryConfig.CELERY_RESULT_BACKEND
     )
     celery.conf.update({
-        'result_backend': ConfigCelery.CELERY_RESULT_BACKEND,
+        'result_backend': CeleryConfig.CELERY_RESULT_BACKEND,
         'broker_connection_retry_on_startup': True
     })
 

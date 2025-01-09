@@ -65,8 +65,7 @@ services:
       - .:/app
       - ./shared_temp:/shared_temp
     command: >
-      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${FLASK_PORT}
-      "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_routes=True); app"
+       gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${FLASK_PORT} wsgi_web:app
     networks:
       - observer_network
 
@@ -77,8 +76,7 @@ services:
       - CONFIG_NAME=${ENV:-Development}
       - REDIS_URL=redis://redis:6379/0
     command: >
-      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${GATEWAY_PORT}
-      "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_gateway=True); app"
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     depends_on:
@@ -93,8 +91,7 @@ services:
       - CONFIG_NAME=${ENV:-Development} # Указывает среду (по умолчанию Development)
       - REDIS_URL=redis://redis:6379/0
     command: >
-      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${SCHEDULER_PORT}
-      "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_scheduler=True); app"
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
     depends_on:
       - redis
     networks:

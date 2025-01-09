@@ -1,8 +1,8 @@
 # from celery import app
 import os
 import logging
-from dotenv import load_dotenv
 from datetime import datetime
+from dotenv import load_dotenv
 from pytz import timezone
 from celery import shared_task
 from app.openai_funcs.openai_funcs import chatgpt_analyze
