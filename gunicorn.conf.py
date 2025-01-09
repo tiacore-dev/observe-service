@@ -11,12 +11,10 @@ bind = f"0.0.0.0:{port}"
 # Количество CPU
 cpu_cores = cpu_count()
 
-# Настройки воркеров
-workers = 4  # Минимум 2 воркера, либо количество CPU
-worker_class = "gevent"  # Используем Gevent для асинхронности
 
-# Потоки (для блокирующих операций)
-threads = 2  # Умеренное количество потоков на воркер
+workers = min(4, cpu_cores)  # Не более 4 воркеров, либо по количеству ядер
+worker_class = "gevent"  # Используем Gevent для асинхронности
+threads = 2  # Достаточно 2 потоков на воркер
 
 # Таймауты
 timeout = 60  # Более короткий таймаут
@@ -26,3 +24,9 @@ keepalive = 2  # Уменьшенное время жизни keep-alive
 loglevel = "info"
 accesslog = "-"
 errorlog = "-"
+
+preload_app = True
+
+worker_connections = 1000  # Максимум 1000 соединений для Gevent
+max_requests = 1000  # Ограничьте число запросов на воркер перед перезапуском
+max_requests_jitter = 50  # Добавьте небольшой рандом для распределения
