@@ -2,6 +2,7 @@ import logging
 import os
 from dotenv import load_dotenv
 import telebot
+from celery import shared_task
 
 load_dotenv()
 
@@ -10,9 +11,10 @@ bot_token = os.getenv('TG_API_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
 
-def send_analysis_result(analysis_text, chat_id):
-    message_text = f"""Получен анализ текста для чата {
-        chat_id}. Текст анализа: {analysis_text}"""
+"""@shared_task
+def send_analysis_result_task(analysis_text, chat_id):
+    message_text = fПолучен анализ текста для чата {
+    chat_id}. Текст анализа: {analysis_text}
     bot = telebot.TeleBot(bot_token)
     try:
 
@@ -22,4 +24,4 @@ def send_analysis_result(analysis_text, chat_id):
         logging.error(f"Ошибка при отправке сообщения в чат {chat_id}: {e}")
     finally:
         # Завершаем работу бота и диспетчера
-        bot.stop_bot()
+        bot.stop_bot()"""

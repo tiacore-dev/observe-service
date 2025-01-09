@@ -29,13 +29,21 @@ logging.basicConfig(
 load_dotenv()
 
 
-def create_app(config_name):
+def create_app(config_name=None, enable_routes=False, enable_scheduler=False, enable_gateway=False):
     app = Flask(__name__)
+
+    # Используем CONFIG_NAME из окружения, если не передано явно
+    config_name = config_name or os.getenv('CONFIG_NAME', 'Development')
     # Установка секретного ключа для сессий
-    app.config['CELERY_BROKER_URL'] = os.getenv(
-        'CELERY_BROKER_URL', 'redis://redis:6379/0')
-    app.config['result_backend'] = os.getenv(
-        'CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+    # Выбор конфигурации
+    if config_name == 'Development':
+        app.config.from_object('config.config_flask.DevelopmentConfig')
+    elif config_name == 'Production':
+        app.config.from_object('config.config_flask.ProductionConfig')
+    elif config_name == 'Celery':
+        app.config.from_object('config.config_flask.CeleryConfig')
+    else:
+        raise ValueError(f"Неизвестное значение config_name: {config_name}")
 
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
@@ -44,9 +52,10 @@ def create_app(config_name):
         x_host=1,  # Учитываем X-Forwarded-Host
         x_port=1   # Учитываем X-Forwarded-Port
     )
+
     # Инициализация базы данных
     try:
-        database_url = os.getenv('DATABASE_URL')
+        database_url = app.config['SQLALCHEMY_DATABASE_URI']
         engine, Session, Base = init_db(database_url)
         set_db_globals(engine, Session, Base)
         set_admin()
@@ -57,7 +66,6 @@ def create_app(config_name):
 
     # Инициализация JWT
     try:
-        app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
         JWTManager(app)
         app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
         logging.info(f"""JWT инициализирован. {
@@ -68,22 +76,22 @@ def create_app(config_name):
 
     # Инициализация OpenAI
     try:
-        app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
         init_openai(app)
         logging.info("OpenAI успешно инициализирован.")
     except Exception as e:
         logging.error(f"Ошибка при инициализации OpenAI: {e}")
         raise
 
-    # Инициализация S3
-    try:
-        init_s3_manager()
-        logging.info("S3 менеджер успешно инициализирован.")
-    except Exception as e:
-        logging.error(f"Ошибка при инициализации S3: {e}")
-        raise
+    if enable_gateway or enable_routes:
+        # Инициализация S3
+        try:
+            init_s3_manager()
+            logging.info("S3 менеджер успешно инициализирован.")
+        except Exception as e:
+            logging.error(f"Ошибка при инициализации S3: {e}")
+            raise
 
-    if config_name == 'Development':
+    if enable_scheduler:
         try:
             clear_existing_jobs()
             start_scheduler()
@@ -92,6 +100,16 @@ def create_app(config_name):
             logging.error(
                 f"Ошибка при инициализации менеджера расписаний: {e}")
             raise
+
+    if enable_routes:
+        # Регистрация маршрутов
+        try:
+            register_routes(app)
+            logging.info("Маршруты успешно зарегистрированы.")
+        except Exception as e:
+            logging.error(f"Ошибка при регистрации маршрутов: {e}")
+            raise
+
         # Инициализация бота
         try:
             bot_token = os.getenv('TG_API_TOKEN')
@@ -105,12 +123,14 @@ def create_app(config_name):
             logging.error(f"Ошибка при инициализации бота: {e}")
             raise
 
-        # Регистрация маршрутов
+        # Gateway маршруты
+    if enable_gateway:
         try:
-            register_routes(app)
-            logging.info("Маршруты успешно зарегистрированы.")
+            from app.routes import gateway_bp
+            app.register_blueprint(gateway_bp)
+            logging.info("Gateway маршруты успешно зарегистрированы.")
         except Exception as e:
-            logging.error(f"Ошибка при регистрации маршрутов: {e}")
+            logging.error(f"Ошибка при регистрации Gateway маршрутов: {e}")
             raise
 
     return app

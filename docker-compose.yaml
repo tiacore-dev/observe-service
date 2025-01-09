@@ -36,9 +36,9 @@ services:
   flower:
     build: .
     command: >
-      celery --broker=redis://redis:6379/0 flower --address=0.0.0.0 --port=5555 --inspect-timeout=10
+      celery --broker=redis://redis:6379/0 flower --address=0.0.0.0 --port=${FLOWER_PORT} --inspect-timeout=10
     ports:
-      - "${FLOWER_PORT}:5555"
+      - "${FLOWER_PORT}:${FLOWER_PORT}"
     depends_on:
       - redis
       - celery
@@ -57,13 +57,47 @@ services:
       - "${FLASK_PORT}:${FLASK_PORT}"
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - CONFIG_NAME=${ENV:-Development}
     depends_on:
       - celery
       - alembic
     volumes:
       - .:/app
       - ./shared_temp:/shared_temp
-    command: gunicorn -c gunicorn.conf.py --worker-class gevent --access-logfile - run:app
+    command: >
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${FLASK_PORT}
+      "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_routes=True); app"
+    networks:
+      - observer_network
+
+  gateway:
+    build:
+      context: .
+    environment:
+      - CONFIG_NAME=${ENV:-Development}
+      - REDIS_URL=redis://redis:6379/0
+    command: >
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${GATEWAY_PORT}
+      "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_gateway=True); app"
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    depends_on:
+      - redis
+    networks:
+      - observer_network
+
+  scheduler:
+    build:
+      context: .
+    environment:
+      - CONFIG_NAME=${ENV:-Development} # Указывает среду (по умолчанию Development)
+      - REDIS_URL=redis://redis:6379/0
+    command: >
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${SCHEDULER_PORT}
+      "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_scheduler=True); app"
+    depends_on:
+      - redis
+      - db
     networks:
       - observer_network
 

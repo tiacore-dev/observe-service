@@ -1,11 +1,8 @@
-# autopep8: off
-#mport eventlet # pylint: disable=import-error
-#ventlet.monkey_patch()
 
-import os # pylint: disable=wrong-import-position
-from dotenv import load_dotenv # pylint: disable=wrong-import-position
-from app import create_app # pylint: disable=wrong-import-position
-# autopep8: on
+import os  # pylint: disable=wrong-import-position
+from dotenv import load_dotenv  # pylint: disable=wrong-import-position
+from app import create_app  # pylint: disable=wrong-import-position
+
 load_dotenv()
 
 # Получаем порт из переменных окружения
