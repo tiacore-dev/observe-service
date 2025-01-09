@@ -12,7 +12,7 @@ bind = f"0.0.0.0:{port}"
 cpu_cores = cpu_count()
 
 
-workers = min(4, cpu_cores)  # Не более 4 воркеров, либо по количеству ядер
+workers = 4  # Не более 4 воркеров, либо по количеству ядер
 worker_class = "gevent"  # Используем Gevent для асинхронности
 threads = 2  # Достаточно 2 потоков на воркер
 
