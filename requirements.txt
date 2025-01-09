@@ -22,3 +22,4 @@ kombu==5.3.4
 amqp==5.1.1
 vine==5.1.0
 gevent==24.11.1
+backoff
