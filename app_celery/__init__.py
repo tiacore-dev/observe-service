@@ -8,10 +8,10 @@ def create_celery_app(flask_app=None):
     celery = Celery(
         __name__,
         broker=CeleryConfig.CELERY_BROKER_URL,
-        backend=CeleryConfig.CELERY_RESULT_BACKEND
+        backend=CeleryConfig.result_backend
     )
     celery.conf.update({
-        'result_backend': CeleryConfig.CELERY_RESULT_BACKEND
+        'result_backend': CeleryConfig.result_backend
     })
 
     if flask_app:
