@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 import requests
 from flask import Blueprint, jsonify, request
-from app.utils.bot_utils import add_text, add_file
+from app_celery.tasks import add_text_task, add_file_task
 from app.openai_funcs.openai_funcs import transcribe_audio
 
 gateway_bp = Blueprint('gateway', __name__)
@@ -135,23 +135,23 @@ def upload_file():
 
 def handle_text(message, db_u, db):
     text = message.get('text')
-    add_text(message, text, db_u, db)
+    add_text_task.delay(message, text, db_u, db)
 
 
 def handle_photo(message, decoded_file, file_name, db_u, db, s3_manager, bucket_name):
     file_stream = BytesIO(decoded_file)
     s3_manager.upload_file(file_stream, bucket_name, file_name)
-    add_file(message, db_u, db, file_name)
+    add_file_task.delay(message, db_u, db, file_name)
 
 
 def handle_document(message, decoded_file, file_name, db_u, db, s3_manager, bucket_name):
     file_stream = BytesIO(decoded_file)
     s3_manager.upload_file(file_stream, bucket_name, file_name)
-    add_file(message, db_u, db, file_name)
+    add_file_task.delay(message, db_u, db, file_name)
 
 
 def handle_voice(message, decoded_file, db_u, db):
     # Дополнительно: транскрибируем аудио
     text = transcribe_audio(decoded_file, 'ogg')
     logging.info(text)
-    add_text(message, text, db_u, db)
+    add_text_task.delay(message, text, db_u, db)
