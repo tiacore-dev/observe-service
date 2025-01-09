@@ -52,7 +52,8 @@ services:
     stdin_open: true
     build: .
     dns:
-      - 127.0.0.11
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
     environment:
@@ -75,6 +76,9 @@ services:
     environment:
       - CONFIG_NAME=${ENV:-Development}
       - REDIS_URL=redis://redis:6379/0
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     command: >
       gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
     ports:
@@ -90,6 +94,9 @@ services:
     environment:
       - CONFIG_NAME=${ENV:-Development} # Указывает среду (по умолчанию Development)
       - REDIS_URL=redis://redis:6379/0
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     command: >
       gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
     depends_on:
