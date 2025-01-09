@@ -20,7 +20,7 @@ scheduler = BackgroundScheduler(
     jobstores={
         'default': RedisJobStore(
             host='redis',  # Имя хоста Redis (или localhost)
-            port=redis_port,     # Порт Redis
+            port=6379,     # Порт Redis
             db=0           # Номер базы Redis
         )
     },
