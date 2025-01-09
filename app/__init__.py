@@ -37,11 +37,11 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
     # Установка секретного ключа для сессий
     # Выбор конфигурации
     if config_name == 'Development':
-        app.config.from_object('config.config_flask.DevelopmentConfig')
+        app.config.from_object('config.DevelopmentConfig')
     elif config_name == 'Production':
-        app.config.from_object('config.config_flask.ProductionConfig')
+        app.config.from_object('config.ProductionConfig')
     elif config_name == 'Celery':
-        app.config.from_object('config.config_flask.CeleryConfig')
+        app.config.from_object('config.CeleryConfig')
     else:
         raise ValueError(f"Неизвестное значение config_name: {config_name}")
 
