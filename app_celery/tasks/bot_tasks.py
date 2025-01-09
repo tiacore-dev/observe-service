@@ -4,7 +4,11 @@ from celery import shared_task
 
 
 @shared_task
-def add_text_task(message, text, db_u, db):
+def add_text_task(message, text):
+    from app.database.managers.user_manager import UserManager
+    from app.database.managers.message_manager import MessageManager
+    db_u = UserManager()
+    db = MessageManager()
     user_id = message.get('user_id')
     chat_id = message.get('chat_id')
 
@@ -35,7 +39,11 @@ def add_text_task(message, text, db_u, db):
 
 
 @shared_task
-def add_file_task(message, db_u, db, file_name):
+def add_file_task(message, file_name):
+    from app.database.managers.user_manager import UserManager
+    from app.database.managers.message_manager import MessageManager
+    db_u = UserManager()
+    db = MessageManager()
     user_id = message.get('user_id')
     chat_id = message.get('chat_id')
     text = message.get('caption')

@@ -51,15 +51,9 @@ def gateway():
         # Логируем извлеченные данные
         logging.debug(f"Извлеченные данные сообщения: {message}")
 
-        # Ваши менеджеры базы данных
-        from app.database.managers.user_manager import UserManager
-        from app.database.managers.message_manager import MessageManager
-        db_u = UserManager()
-        db = MessageManager()
-
         # Обработка сообщения
         if message.get('content_type') == 'text':
-            handle_text(message, db_u, db)
+            handle_text(message)
 
         return jsonify({"status": "success", "message": "Message processed successfully"}), 200
 
@@ -74,10 +68,6 @@ def upload_file():
     from app.s3 import get_s3_manager, get_bucket_name
     s3_manager = get_s3_manager()
     bucket_name = get_bucket_name()
-    from app.database.managers.user_manager import UserManager
-    from app.database.managers.message_manager import MessageManager
-    db_u = UserManager()
-    db = MessageManager()
 
     try:
         # Логируем сырые данные запроса
@@ -115,12 +105,12 @@ def upload_file():
 
         if content_type == 'photo':
             handle_photo(message, decoded_file, file_name,
-                         db_u, db, s3_manager, bucket_name)
+                         s3_manager, bucket_name)
         elif content_type == 'document':
             handle_document(message, decoded_file, file_name,
-                            db_u, db, s3_manager, bucket_name)
+                            s3_manager, bucket_name)
         elif content_type == 'voice':
-            handle_voice(message, decoded_file, db_u, db)
+            handle_voice(message, decoded_file)
         else:
             logging.error(f"Неподдерживаемый тип контента: {content_type}")
             return jsonify({"status": "error", "message": "Unsupported content type"}), 400
@@ -133,25 +123,25 @@ def upload_file():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-def handle_text(message, db_u, db):
+def handle_text(message):
     text = message.get('text')
-    add_text_task.delay(message, text, db_u, db)
+    add_text_task.delay(message, text)
 
 
-def handle_photo(message, decoded_file, file_name, db_u, db, s3_manager, bucket_name):
+def handle_photo(message, decoded_file, file_name, s3_manager, bucket_name):
     file_stream = BytesIO(decoded_file)
     s3_manager.upload_file(file_stream, bucket_name, file_name)
-    add_file_task.delay(message, db_u, db, file_name)
+    add_file_task.delay(message, file_name)
 
 
-def handle_document(message, decoded_file, file_name, db_u, db, s3_manager, bucket_name):
+def handle_document(message, decoded_file, file_name, s3_manager, bucket_name):
     file_stream = BytesIO(decoded_file)
     s3_manager.upload_file(file_stream, bucket_name, file_name)
-    add_file_task.delay(message, db_u, db, file_name)
+    add_file_task.delay(message, file_name)
 
 
-def handle_voice(message, decoded_file, db_u, db):
+def handle_voice(message, decoded_file):
     # Дополнительно: транскрибируем аудио
     text = transcribe_audio(decoded_file, 'ogg')
     logging.info(text)
-    add_text_task.delay(message, text, db_u, db)
+    add_text_task.delay(message, text)

@@ -64,11 +64,6 @@ services:
       - .:/app
       - ./shared_temp:/shared_temp
     command: gunicorn -c gunicorn.conf.py --worker-class gevent --access-logfile - run:app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${FLASK_PORT}"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     networks:
       - observer_network
 
