@@ -108,20 +108,21 @@ def start_scheduler():
 def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
     job_id = f"schedule_{chat_id}"
 
-    # Проверяем наличие задачи перед удалением
-    if scheduler.get_job(job_id=job_id):
+    try:
+        # Удаляем задачу, если она существует
         scheduler.remove_job(job_id=job_id)
         logging.info(f"Существующая задача {job_id} удалена.")
+    except JobLookupError:
+        logging.warning(f"Задача {job_id} не найдена для удаления.")
 
     # Добавляем новую задачу
     scheduler.add_job(
-        execute_analysis_and_send,
-        'cron',
+        func=execute_analysis_and_send,
+        trigger='cron',
+        id=job_id,
         hour=send_time.hour,
         minute=send_time.minute,
-        args=[chat_id, analysis_time],
-        id=job_id,
-        replace_existing=True
+        args=[chat_id],
     )
     logging.info(f"""Задача {job_id} добавлена: анализ в {
                  analysis_time}, отправка в {send_time}.""")
