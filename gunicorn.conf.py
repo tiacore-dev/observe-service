@@ -13,7 +13,7 @@ bind = f"0.0.0.0:{port}"
 cpu_cores = cpu_count()
 
 # Настройка воркеров
-workers = cpu_cores * 2 + 3
+workers = cpu_cores * 2 + 4
 worker_class = "gevent"
 
 # Таймауты
