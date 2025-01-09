@@ -97,7 +97,6 @@ services:
       "from app import create_app; app = create_app(os.environ.get('CONFIG_NAME', 'Development'), enable_scheduler=True); app"
     depends_on:
       - redis
-      - db
     networks:
       - observer_network
 
