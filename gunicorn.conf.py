@@ -12,16 +12,19 @@ bind = f"0.0.0.0:{port}"
 # Получение числа CPU
 cpu_cores = cpu_count()
 
-# Настройка воркеров
-workers = cpu_cores * 2 + 3
+
+# Количество воркеров
+workers = cpu_count() * 2 + 2  # Оставьте стандартное 2 CPU на воркер
 worker_class = "gevent"
 
-# Таймауты
-timeout = 1200
-keepalive = 1
+# Таймаут соединения
+timeout = 120  # Уменьшите таймаут до 2 минут, чтобы не блокировать слишком долго
+keepalive = 5  # Увеличьте keep-alive для повторных соединений
+
+# Ограничение очереди соединений
+worker_connections = 1000  # Для gevent, чтобы обработать больше соединений
 
 # Логи
 loglevel = "info"
-errorlog = "-"
 accesslog = "-"
-capture_output = True
+errorlog = "-"
