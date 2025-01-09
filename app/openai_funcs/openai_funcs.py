@@ -39,7 +39,6 @@ def transcribe_audio(audio, file_format):
 
 @backoff.on_exception(
     backoff.expo,
-    (openai.error.OpenAIError, ConnectionError),
     max_tries=5,
     max_time=30  # Максимальное время ожидания
 )
