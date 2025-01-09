@@ -11,8 +11,7 @@ def create_celery_app(flask_app=None):
         backend=CeleryConfig.CELERY_RESULT_BACKEND
     )
     celery.conf.update({
-        'result_backend': CeleryConfig.CELERY_RESULT_BACKEND,
-        'BROKER_CONNECTION_RETRY_ON_STARTUP': True
+        'result_backend': CeleryConfig.CELERY_RESULT_BACKEND
     })
 
     if flask_app:

@@ -3,6 +3,7 @@ import os
 import logging
 from pytz import timezone
 from dotenv import load_dotenv
+from apscheduler.jobstores.base import JobLookupError
 from apscheduler.jobstores.redis import RedisJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 from celery import chain
@@ -19,7 +20,7 @@ scheduler = BackgroundScheduler(
     jobstores={
         'default': RedisJobStore(
             host='redis',  # Имя хоста Redis (или localhost)
-            port=6379,     # Порт Redis
+            port=redis_port,     # Порт Redis
             db=0           # Номер базы Redis
         )
     },
@@ -62,24 +63,24 @@ def sync_schedules():
     for job in scheduled_jobs:
         job_chat_id = job.id.replace("schedule_", "")
         if job_chat_id not in active_chat_ids:
-            # Удаление задачи, если она неактуальна
-            scheduler.remove_job(job.id)
-            logging.info(f"Задача {job.id} удалена из планировщика.")
+            try:
+                # Удаление задачи, если она неактуальна
+                scheduler.remove_job(job.id)
+                logging.info(f"Задача {job.id} удалена из планировщика.")
+            except JobLookupError:
+                logging.warning(f"Задача {job.id} не найдена в планировщике.")
 
 
 def start_scheduler():
     """
     Запуск планировщика с асинхронной обработкой и загрузкой задач из базы.
     """
-
     from app.database.managers.chat_manager import ChatManager
-    # Инициализация задач из базы данных
     chat_manager = ChatManager()
     try:
         chats = chat_manager.get_all_chats()
         for chat in chats:
             if chat.schedule_analysis and chat.send_time:
-                # Добавляем задачу для каждого чата с активным расписанием
                 add_schedule_to_scheduler(
                     chat_id=chat.chat_id,
                     analysis_time=chat.analysis_time,
@@ -89,16 +90,22 @@ def start_scheduler():
     except Exception as e:
         logging.error(
             f"Ошибка при инициализации планировщика из базы данных: {e}")
-    scheduler.add_job(
-        sync_schedules,
-        'interval',
-        minutes=5,  # Интервал синхронизации
-        id='sync_schedules',
-        replace_existing=True
-    )
+
+    # Добавляем задачу синхронизации
+    try:
+        scheduler.add_job(
+            sync_schedules,
+            'interval',
+            minutes=5,  # Интервал синхронизации
+            id='sync_schedules',
+            replace_existing=True
+        )
+    except Exception as e:
+        logging.error(f"Ошибка при добавлении задачи синхронизации: {e}")
 
     scheduler.start()
     logging.info("Планировщик успешно запущен.")
+    list_scheduled_jobs()
 
 
 def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
@@ -139,14 +146,12 @@ def list_scheduled_jobs():
         logging.info(f"Job ID: {job.id}, trigger: {job.trigger}")
 
 
-def remove_schedule_from_scheduler(chat_id):
-    job_id = f"schedule_{chat_id}"
+def remove_schedule_from_scheduler(job_id):
     try:
         scheduler.remove_job(job_id)
-        logging.info(f"Задача {job_id} успешно удалена из планировщика.")
-    except Exception as e:
-        logging.warning(
-            f"Задача {job_id} не найдена в планировщике с ошибкой {e}.")
+        logging.info(f"Задача {job_id} успешно удалена.")
+    except JobLookupError:
+        logging.warning(f"Задача {job_id} не найдена.")
 
 
 def clear_existing_jobs():
