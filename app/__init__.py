@@ -1,3 +1,8 @@
+# autopep8: off
+from gevent import monkey # pylint: disable=import-error
+monkey.patch_all()
+
+
 import logging
 import os
 from datetime import timedelta
@@ -13,7 +18,7 @@ from app.routes import register_routes
 from app.openai_funcs import init_openai
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
 from app.utils.scheduler import start_scheduler, clear_existing_jobs
-
+# autopep8: on
 
 # Настройка логирования
 logging.basicConfig(
