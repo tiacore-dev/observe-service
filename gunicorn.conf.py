@@ -1,16 +1,27 @@
+from multiprocessing import cpu_count
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-port = os.getenv('FLASK_PORT')
-
+# Порт и биндинг
+port = os.getenv('FLASK_PORT', '5000')
 bind = f"0.0.0.0:{port}"
-workers = 4
-timeout = 600
+
+
+# Получение числа CPU
+cpu_cores = cpu_count()
+
+# Настройка воркеров
+workers = cpu_cores * 2 + 2
+worker_class = "gevent"
+
+# Таймауты
+timeout = 1200
+keepalive = 1
 
 # Логи
 loglevel = "info"
-errorlog = "-"  # Логи ошибок выводятся в stderr
-accesslog = "-"  # Логи доступа выводятся в stdout
-capture_output = True  # Перехватывать вывод stdout/stderr из приложения
+errorlog = "-"
+accesslog = "-"
+capture_output = True

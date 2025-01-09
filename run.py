@@ -1,6 +1,6 @@
 # autopep8: off
-import eventlet # pylint: disable=import-error
-eventlet.monkey_patch()
+#mport eventlet # pylint: disable=import-error
+#ventlet.monkey_patch()
 
 import os # pylint: disable=wrong-import-position
 from dotenv import load_dotenv # pylint: disable=wrong-import-position
