@@ -45,6 +45,10 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
     else:
         raise ValueError(f"Неизвестное значение config_name: {config_name}")
 
+    app.config['CELERY_BROKER_URL'] = os.getenv(
+        'CELERY_BROKER_URL', 'redis://redis:6379/0')
+    app.config['result_backend'] = os.getenv(
+        'CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,  # Используем 1 прокси для заголовка X-Forwarded-For
