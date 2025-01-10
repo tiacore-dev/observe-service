@@ -1,3 +1,6 @@
+import logging
+
+
 def get_prompt(prompt_id):
     from app.database.managers.prompt_manager import PromptManager
     db = PromptManager()
@@ -15,12 +18,30 @@ def get_prompt_name(prompt_id):
 def get_user_name(user_id):
     from app.database.managers.user_manager import UserManager
     db = UserManager()
-    user = db.get_user_by_user_id(user_id)
-    return user.username
+    try:
+        user = db.get_user_by_user_id(user_id)
+        if user:
+            return user['username']
+        else:
+            logging.warning(f"Пользователь с ID {user_id} не найден.")
+            return None
+    except Exception as e:
+        logging.error(
+            f"Ошибка при получении имени пользователя {user_id}: {e}")
+        raise
 
 
 def get_chat_name(chat_id):
     from app.database.managers.chat_manager import ChatManager
     db = ChatManager()
-    chat = db.get_chat_by_id(chat_id)
-    return chat.chat_name
+    try:
+        chat = db.get_chat_by_id(chat_id)
+        if chat:
+            return chat['chat_name']
+        else:
+            logging.warning(f"Чат с ID {chat_id} не найден.")
+            return None
+    except Exception as e:
+        logging.error(
+            f"Ошибка при получении имени чата {chat_id}: {e}")
+        raise

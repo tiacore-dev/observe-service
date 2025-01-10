@@ -8,8 +8,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf  # Монтируем файл конфигурации
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]  # Указываем путь к конфигу
     networks:
       - observer_network
+
 
   alembic:
     build: .
@@ -22,7 +26,14 @@ services:
   celery:
     build: .
     command: >
-      celery -A celery_worker:celery worker -l info -E
+        sh -c "
+        celery -A celery_worker:celery worker --loglevel=info --queues=analyze_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=save_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=send_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=telegram_queue &
+        celery -A celery_worker:celery worker --loglevel=info --queues=default
+        "
+      #celery -A celery_worker:celery worker -l info -E
     environment:
       - REDIS_URL=redis://redis:6379/0
     depends_on:
@@ -33,42 +44,66 @@ services:
     networks:
       - observer_network
 
-  flower:
-    build: .
-    command: >
-      celery --broker=redis://redis:6379/0 flower --address=0.0.0.0 --port=5555 --inspect-timeout=10
-    ports:
-      - "${FLOWER_PORT}:5555"
-    depends_on:
-      - redis
-      - celery
-    volumes:
-      - .:/app
-    networks:
-      - observer_network
 
   web:
     tty: true
     stdin_open: true
     build: .
     dns:
-      - 127.0.0.11
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - CONFIG_NAME=${ENV:-Development}
     depends_on:
       - celery
       - alembic
     volumes:
       - .:/app
       - ./shared_temp:/shared_temp
-    command: gunicorn -c gunicorn.conf.py --worker-class gevent --access-logfile - run:app
+    command: >
+       gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${FLASK_PORT} wsgi_web:app
+    networks:
+      - observer_network
+
+  gateway:
+    build:
+      context: .
+    environment:
+      - CONFIG_NAME=${ENV:-Development}
+      - REDIS_URL=redis://redis:6379/0
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    command: >
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    depends_on:
+      - redis
+      - web
+    networks:
+      - observer_network
+
+  scheduler:
+    build:
+      context: .
+    environment:
+      - CONFIG_NAME=${ENV:-Development} # Указывает среду (по умолчанию Development)
+      - REDIS_URL=redis://redis:6379/0
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    command: >
+      gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
+    depends_on:
+      - redis
+      - web
     networks:
       - observer_network
 
 networks:
   observer_network:
     driver: bridge
-    driver_opts:
-      com.docker.network.driver.mtu: 1500

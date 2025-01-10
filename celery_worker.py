@@ -1,7 +1,8 @@
-# celery_worker.py
+
 
 from app import create_app
 from app_celery import create_celery_app
+
 
 print('RUNNING CELERY WORKER')
 

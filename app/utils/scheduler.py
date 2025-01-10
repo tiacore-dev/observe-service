@@ -1,16 +1,34 @@
 from datetime import datetime
+import os
 import logging
 from pytz import timezone
+from dotenv import load_dotenv
 from apscheduler.jobstores.base import JobLookupError
+from apscheduler.jobstores.redis import RedisJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.memory import MemoryJobStore
-from app_celery.tasks import analyze_and_send_task
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from celery import chain
+from app_celery.tasks import send_analysis_result_task, analyze_task, save_analysis_result_task
 
 novosibirsk_tz = timezone('Asia/Novosibirsk')
 now = datetime.now(novosibirsk_tz)
 
+load_dotenv()
+
+redis_port = os.getenv('REDIS_PORT')
+
 scheduler = BackgroundScheduler(
-    jobstores={'default': MemoryJobStore()},
+    jobstores={
+        'default': RedisJobStore(
+            host='redis',  # Имя хоста Redis (или localhost)
+            port=6379,     # Порт Redis
+            db=0           # Номер базы Redis
+        )
+    },
+    executors={
+        'default': ThreadPoolExecutor(10),  # 10 потоков для задач
+        'processpool': ProcessPoolExecutor(2)  # 2 процесса
+    },
     timezone='Asia/Novosibirsk'
 )
 
@@ -19,8 +37,13 @@ def execute_analysis_and_send(chat_id, analysis_time):
     """
     Выполняет анализ сообщений для указанного чата и отправляет результат в Telegram.
     """
-    task = analyze_and_send_task.delay(chat_id, analysis_time)
-    logging.info(f'Выполнение задачи {task}')
+    task_chain = chain(
+        analyze_task.s(chat_id, analysis_time),
+        save_analysis_result_task.s(),
+        send_analysis_result_task.s()
+    )
+    task_chain.apply_async()
+    logging.info(f"Цепочка задач для чата {chat_id} запущена.")
 
 
 def start_scheduler():

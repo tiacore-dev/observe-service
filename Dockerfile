@@ -4,15 +4,14 @@ FROM python:3.12-slim
 # Указываем рабочую директорию внутри контейнера
 WORKDIR /app
 
-# Устанавливаем зависимости системы (включая curl)
+# Устанавливаем зависимости системы (включая ping и curl)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    iputils-ping \
+    ca-certificates \
+    && update-ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && update-ca-certificates
 
 # Копируем файл зависимостей в рабочую директорию
 COPY requirements.txt .
