@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import OperationalError
 from pytz import timezone
 from celery import shared_task
+from telebot import TeleBot
+from app.utils.db_get import get_chat_name
 
 
 load_dotenv()
@@ -143,10 +145,10 @@ def send_analysis_result_task(data):
         logging.error(
             "Переданы некорректные данные в send_analysis_result_task.")
         return
-    from telebot import TeleBot
 
+    chat = get_chat_name(data['chat_id'])
     message_text = f"""Результат анализа для чата {
-        data['chat_id']}:\n\n{data['analysis_result']}"""
+        chat}:\n\n{data['analysis_result']}"""
     bot = TeleBot(BOT_TOKEN)
 
     try:

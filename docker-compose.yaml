@@ -8,8 +8,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf  # Монтируем файл конфигурации
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]  # Указываем путь к конфигу
     networks:
       - observer_network
+
 
   alembic:
     build: .
