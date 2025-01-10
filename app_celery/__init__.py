@@ -16,6 +16,8 @@ def create_celery_app(flask_app=None):
             'app_celery.tasks.schedule_tasks.analyze_task': {'queue': 'analyze_queue'},
             'app_celery.tasks.schedule_tasks.save_analysis_result_task': {'queue': 'save_queue'},
             'app_celery.tasks.schedule_tasks.send_analysis_result_task': {'queue': 'send_queue'},
+            'app_celery.tasks.bot_tasks.add_text_task': {'queue': 'telegram_queue'},
+            'app_celery.tasks.bot_tasks.add_file_task': {'queue': 'telegram_queue'},
         },
         task_default_queue='default',
     )
