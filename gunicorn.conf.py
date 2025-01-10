@@ -13,7 +13,7 @@ cpu_cores = cpu_count()
 
 
 workers = max(2, min(4, cpu_cores // 2))  # Баланс между ядрами и воркерами
-worker_class = "gevent"  # Используем Gevent для асинхронности
+# worker_class = "gevent"  # Используем Gevent для асинхронности
 threads = 4  # Увеличьте до 4 потоков на воркер
 
 
