@@ -35,93 +35,98 @@ class MessageManager:
     def get_filtered_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None):
         session = self.Session()
         query = session.query(Message)
+        try:
+            # Фильтр по периоду
+            if start_date:
+                if isinstance(start_date, str):
+                    try:
+                        # Используем isoparse для строк с временными зонами
+                        start_date_parsed = isoparse(start_date)
+                    except ValueError as e:
+                        raise ValueError(f"""Некорректный формат start_date: {
+                            start_date}""") from e
+                elif isinstance(start_date, datetime):
+                    start_date_parsed = start_date
+                else:
+                    raise ValueError(
+                        "start_date должен быть строкой в формате ISO 8601 или datetime.")
+                query = query.filter(Message.timestamp >= start_date_parsed)
 
-        # Фильтр по периоду
-        if start_date:
-            if isinstance(start_date, str):
-                try:
-                    # Используем isoparse для строк с временными зонами
-                    start_date_parsed = isoparse(start_date)
-                except ValueError as e:
-                    raise ValueError(f"Некорректный формат start_date: {
-                                     start_date}") from e
-            elif isinstance(start_date, datetime):
-                start_date_parsed = start_date
-            else:
-                raise ValueError(
-                    "start_date должен быть строкой в формате ISO 8601 или datetime.")
-            query = query.filter(Message.timestamp >= start_date_parsed)
+            if end_date:
+                if isinstance(end_date, str):
+                    try:
+                        # Используем isoparse для строк с временными зонами
+                        end_date_parsed = isoparse(end_date)
+                    except ValueError as e:
+                        raise ValueError(f"""Некорректный формат end_date: {
+                            end_date}""") from e
+                elif isinstance(end_date, datetime):
+                    end_date_parsed = end_date
+                else:
+                    raise ValueError(
+                        "end_date должен быть строкой в формате ISO 8601 или datetime.")
+                query = query.filter(Message.timestamp <= end_date_parsed)
 
-        if end_date:
-            if isinstance(end_date, str):
-                try:
-                    # Используем isoparse для строк с временными зонами
-                    end_date_parsed = isoparse(end_date)
-                except ValueError as e:
-                    raise ValueError(f"Некорректный формат end_date: {
-                                     end_date}") from e
-            elif isinstance(end_date, datetime):
-                end_date_parsed = end_date
-            else:
-                raise ValueError(
-                    "end_date должен быть строкой в формате ISO 8601 или datetime.")
-            query = query.filter(Message.timestamp <= end_date_parsed)
+            # Фильтр по пользователю
+            if user_id:
+                query = query.filter(Message.user_id == int(user_id))
 
-        # Фильтр по пользователю
-        if user_id:
-            query = query.filter(Message.user_id == int(user_id))
+            # Фильтр по чату
+            if chat_id:
+                query = query.filter(Message.chat_id == int(chat_id))
 
-        # Фильтр по чату
-        if chat_id:
-            query = query.filter(Message.chat_id == int(chat_id))
-
-        return query.all()
+            return query.all()
+        finally:
+            session.close()
 
     def get_paginated_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None, limit=10, offset=0):
         session = self.Session()
         query = session.query(Message)
+        try:
+            # Фильтры
+            if start_date:
+                if isinstance(start_date, str):
+                    try:
+                        start_date_parsed = isoparse(
+                            start_date)  # Поддержка ISO-строк
+                    except ValueError as e:
+                        raise ValueError(f"""Некорректный формат start_date: {
+                            start_date}""") from e
+                elif isinstance(start_date, datetime):
+                    start_date_parsed = start_date
+                else:
+                    raise ValueError(
+                        "start_date должен быть строкой в формате ISO 8601 или datetime.")
+                query = query.filter(Message.timestamp >= start_date_parsed)
 
-        # Фильтры
-        if start_date:
-            if isinstance(start_date, str):
-                try:
-                    start_date_parsed = isoparse(
-                        start_date)  # Поддержка ISO-строк
-                except ValueError as e:
-                    raise ValueError(f"Некорректный формат start_date: {
-                                     start_date}") from e
-            elif isinstance(start_date, datetime):
-                start_date_parsed = start_date
-            else:
-                raise ValueError(
-                    "start_date должен быть строкой в формате ISO 8601 или datetime.")
-            query = query.filter(Message.timestamp >= start_date_parsed)
+            if end_date:
+                if isinstance(end_date, str):
+                    try:
+                        end_date_parsed = isoparse(
+                            end_date)  # Поддержка ISO-строк
+                    except ValueError as e:
+                        raise ValueError(f"""Некорректный формат end_date: {
+                            end_date}""") from e
+                elif isinstance(end_date, datetime):
+                    end_date_parsed = end_date
+                else:
+                    raise ValueError(
+                        "end_date должен быть строкой в формате ISO 8601 или datetime.")
+                query = query.filter(Message.timestamp <= end_date_parsed)
 
-        if end_date:
-            if isinstance(end_date, str):
-                try:
-                    end_date_parsed = isoparse(end_date)  # Поддержка ISO-строк
-                except ValueError as e:
-                    raise ValueError(f"Некорректный формат end_date: {
-                                     end_date}") from e
-            elif isinstance(end_date, datetime):
-                end_date_parsed = end_date
-            else:
-                raise ValueError(
-                    "end_date должен быть строкой в формате ISO 8601 или datetime.")
-            query = query.filter(Message.timestamp <= end_date_parsed)
+            if user_id:
+                query = query.filter(Message.user_id == int(user_id))
 
-        if user_id:
-            query = query.filter(Message.user_id == int(user_id))
+            if chat_id:
+                query = query.filter(Message.chat_id == int(chat_id))
 
-        if chat_id:
-            query = query.filter(Message.chat_id == int(chat_id))
+            # Общее количество сообщений (для пагинации)
+            total_count = query.count()
 
-        # Общее количество сообщений (для пагинации)
-        total_count = query.count()
+            # Применяем limit и offset
+            query = query.order_by(Message.timestamp.desc()
+                                   ).limit(limit).offset(offset)
 
-        # Применяем limit и offset
-        query = query.order_by(Message.timestamp.desc()
-                               ).limit(limit).offset(offset)
-
-        return query.all(), total_count
+            return query.all(), total_count
+        finally:
+            session.close()
