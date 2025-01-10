@@ -33,19 +33,6 @@ services:
     networks:
       - observer_network
 
-  flower:
-    build: .
-    command: >
-      celery --broker=redis://redis:6379/0 flower --address=0.0.0.0 --port=${FLOWER_PORT} --inspect-timeout=10
-    ports:
-      - "${FLOWER_PORT}:${FLOWER_PORT}"
-    depends_on:
-      - redis
-      - celery
-    volumes:
-      - .:/app
-    networks:
-      - observer_network
 
   web:
     tty: true
