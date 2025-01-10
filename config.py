@@ -5,6 +5,8 @@ load_dotenv()
 
 
 class ConfigFlask:
+    CELERY_BROKER_URL = 'redis://redis:6379/0'
+    result_backend = 'redis://redis:6379/0'
     broker_transport = 'redis'
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SECRET_KEY = os.getenv('SECRET_KEY')
