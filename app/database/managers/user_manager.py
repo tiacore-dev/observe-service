@@ -32,8 +32,14 @@ class UserManager:
         """Получаем пользователя по его ID"""
         with self.Session() as session:
             try:
+                logging.info(
+                    f"Открытие сессии для получения пользователя {user_id}")
                 user = session.query(User).filter(
                     User.user_id == user_id).first()
+                if user:
+                    logging.info(f"Пользователь найден: {user}")
+                else:
+                    logging.warning(f"Пользователь с ID {user_id} не найден.")
                 return user
             except Exception as e:
                 logging.error(

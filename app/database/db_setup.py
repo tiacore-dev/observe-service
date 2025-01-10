@@ -10,7 +10,8 @@ if not Base:
 def init_db(database_url):
     global Session, engine
     if not engine:
-        engine = create_engine(database_url, echo=False)
+        engine = create_engine(database_url, echo=False,
+                               isolation_level="READ COMMITTED")
     # Session = sessionmaker(bind=engine)
     if not Session:
         Session = scoped_session(sessionmaker(bind=engine))
