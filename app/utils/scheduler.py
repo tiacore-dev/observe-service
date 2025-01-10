@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.jobstores.redis import RedisJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from celery import chain
 from app_celery.tasks import send_analysis_result_task, analyze_task, save_analysis_result_task
 
@@ -23,6 +24,10 @@ scheduler = BackgroundScheduler(
             port=6379,     # Порт Redis
             db=0           # Номер базы Redis
         )
+    },
+    executors={
+        'default': ThreadPoolExecutor(10),  # 10 потоков для задач
+        'processpool': ProcessPoolExecutor(2)  # 2 процесса
     },
     timezone='Asia/Novosibirsk'
 )
