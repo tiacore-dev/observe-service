@@ -130,6 +130,7 @@ def save_analysis_result_task(data):
     )
 
     logging.info(f"Результат анализа сохранён для чата {data['chat_id']}.")
+    return data
 
 
 @shared_task
@@ -137,6 +138,10 @@ def send_analysis_result_task(data):
     """
     Отправляет результат анализа в Telegram.
     """
+    if not data or not isinstance(data, dict):
+        logging.error(
+            "Переданы некорректные данные в send_analysis_result_task.")
+        return
     from telebot import TeleBot
 
     message_text = f"""Результат анализа для чата {
