@@ -53,7 +53,7 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
         x_port=1   # Учитываем X-Forwarded-Port
     )
 
-    if config_name == 'Celery':
+    if enable_routes:
         # Инициализация базы данных
         try:
             database_url = app.config['SQLALCHEMY_DATABASE_URI']
@@ -65,15 +65,36 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
             logging.error(f"Ошибка при инициализации базы данных: {e}")
             raise
 
-    # Инициализация JWT
-    try:
-        JWTManager(app)
-        app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-        logging.info(f"""JWT инициализирован. {
-                     app.config['JWT_ACCESS_TOKEN_EXPIRES']}""")
-    except Exception as e:
-        logging.error(f"Ошибка при инициализации JWT: {e}")
-        raise
+        # Инициализация JWT
+        try:
+            JWTManager(app)
+            app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+            logging.info(f"""JWT инициализирован. {
+                app.config['JWT_ACCESS_TOKEN_EXPIRES']}""")
+        except Exception as e:
+            logging.error(f"Ошибка при инициализации JWT: {e}")
+            raise
+
+        # Регистрация маршрутов
+        try:
+            register_routes(app)
+            logging.info("Маршруты успешно зарегистрированы.")
+        except Exception as e:
+            logging.error(f"Ошибка при регистрации маршрутов: {e}")
+            raise
+
+        # Инициализация бота
+        try:
+            bot_token = os.getenv('TG_API_TOKEN')
+            bot = telebot.TeleBot(bot_token)
+            logging.info("Бот успешно инициализирован")
+            sync_chats_from_messages(bot)
+            update_usernames(bot)
+            bot.stop_bot()
+            logging.info("Бот успешно выполнил задачи и остановлен")
+        except Exception as e:
+            logging.error(f"Ошибка при инициализации бота: {e}")
+            raise
 
     # Инициализация OpenAI
     try:
@@ -100,28 +121,6 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
         except Exception as e:
             logging.error(
                 f"Ошибка при инициализации менеджера расписаний: {e}")
-            raise
-
-    if enable_routes:
-        # Регистрация маршрутов
-        try:
-            register_routes(app)
-            logging.info("Маршруты успешно зарегистрированы.")
-        except Exception as e:
-            logging.error(f"Ошибка при регистрации маршрутов: {e}")
-            raise
-
-        # Инициализация бота
-        try:
-            bot_token = os.getenv('TG_API_TOKEN')
-            bot = telebot.TeleBot(bot_token)
-            logging.info("Бот успешно инициализирован")
-            sync_chats_from_messages(bot)
-            update_usernames(bot)
-            bot.stop_bot()
-            logging.info("Бот успешно выполнил задачи и остановлен")
-        except Exception as e:
-            logging.error(f"Ошибка при инициализации бота: {e}")
             raise
 
         # Gateway маршруты
