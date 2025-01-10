@@ -35,5 +35,5 @@ jobs:
           cd apps/observe-service-dev && 
           git pull origin dev && 
           ENV=Development docker compose down && 
-          ENV=Development docker compose up --build -d
+          ENV=Development docker compose up -d
           "

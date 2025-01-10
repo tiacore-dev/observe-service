@@ -110,7 +110,7 @@ def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
         id=job_id,
         hour=send_time.hour,
         minute=send_time.minute,
-        args=[chat_id],
+        args=[chat_id, analysis_time],
     )
     logging.info(f"""Задача {job_id} добавлена: анализ в {
                  analysis_time}, отправка в {send_time}.""")
