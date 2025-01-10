@@ -47,7 +47,9 @@ class MessageManager:
             if chat_id:
                 query = query.filter(Message.chat_id == chat_id)
             try:
-                results = session.execute(query).scalars().all()
+                # results = session.execute(query).scalars().all()
+                results = query.all()
+
                 return results
             except Exception as e:
                 logging.error(f"Ошибка выполнения запроса: {e}")
