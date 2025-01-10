@@ -72,6 +72,7 @@ services:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     depends_on:
       - redis
+      - web
     networks:
       - observer_network
 
@@ -88,6 +89,7 @@ services:
       gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
     depends_on:
       - redis
+      - web
     networks:
       - observer_network
 
