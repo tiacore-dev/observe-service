@@ -5,8 +5,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 from pytz import timezone
 from celery import shared_task
-from app.openai_funcs.openai_funcs import chatgpt_analyze
-from app.utils.db_get import get_prompt
 
 
 load_dotenv()
@@ -27,6 +25,7 @@ def analyze_task(chat_id, analysis_time):
     from app.database.managers.chat_manager import ChatManager
     from app.database.managers.message_manager import MessageManager
     from app.utils.db_get import get_prompt
+    from app.openai_funcs.openai_funcs import chatgpt_analyze
     chat_manager = ChatManager()
     message_manager = MessageManager()
 
