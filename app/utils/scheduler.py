@@ -41,43 +41,19 @@ def execute_analysis_and_send(chat_id, analysis_time):
     logging.info(f"Цепочка задач для чата {chat_id} запущена.")
 
 
-"""def sync_schedules():
-    from app.database.managers.chat_manager import ChatManager
-    chat_manager = ChatManager()
-
-    # Получение всех чатов с активным расписанием
-    chats = chat_manager.get_all_chats()
-    active_chat_ids = set(
-        chat.chat_id for chat in chats if chat.schedule_analysis and chat.send_time)
-
-    # Получение всех задач из планировщика
-    existing_jobs = {job.id for job in scheduler.get_jobs()}
-
-    # Добавляем новые задачи
-    for chat in chats:
-        if chat.chat_id not in existing_jobs and chat.schedule_analysis and chat.send_time:
-            add_schedule_to_scheduler(
-                chat.chat_id, chat.analysis_time, chat.send_time)
-
-    # Удаляем неактуальные задачи
-    for job_id in existing_jobs:
-        if job_id.startswith("schedule_"):
-            chat_id = job_id.replace("schedule_", "")
-            if chat_id not in active_chat_ids:
-                scheduler.remove_job(job_id)
-                logging.info(f"Удалена неактуальная задача {job_id}.")"""
-
-
 def start_scheduler():
     """
     Запуск планировщика с асинхронной обработкой и загрузкой задач из базы.
     """
+
     from app.database.managers.chat_manager import ChatManager
+    # Инициализация задач из базы данных
     chat_manager = ChatManager()
     try:
         chats = chat_manager.get_all_chats()
         for chat in chats:
             if chat.schedule_analysis and chat.send_time:
+                # Добавляем задачу для каждого чата с активным расписанием
                 add_schedule_to_scheduler(
                     chat_id=chat.chat_id,
                     analysis_time=chat.analysis_time,
@@ -90,30 +66,39 @@ def start_scheduler():
 
     scheduler.start()
     logging.info("Планировщик успешно запущен.")
-    list_scheduled_jobs()
 
 
 def add_schedule_to_scheduler(chat_id, analysis_time, send_time):
+    """
+    Добавляет или обновляет задачу анализа для указанного чата.
+    """
+    if not analysis_time or not send_time:
+        logging.warning(f"""Невозможно добавить задачу для чата {
+                        chat_id}: время анализа или отправки не указано.""")
+        return
+
     job_id = f"schedule_{chat_id}"
 
-    try:
-        # Удаляем задачу, если она существует
+    # Удаляем существующую задачу, если она есть
+    existing_job = scheduler.get_job(job_id=job_id)
+    if existing_job:
+        logging.info(f"""Удаление существующей задачи для чата {
+                     chat_id} с ID {job_id}.""")
         scheduler.remove_job(job_id=job_id)
-        logging.info(f"Существующая задача {job_id} удалена.")
-    except JobLookupError:
-        logging.warning(f"Задача {job_id} не найдена для удаления.")
-
+    logging.info(f"Текущее время Новосибирска: {now}")
     # Добавляем новую задачу
     scheduler.add_job(
-        func=execute_analysis_and_send,
-        trigger='cron',
-        id=job_id,
+        execute_analysis_and_send,
+        'cron',
         hour=send_time.hour,
         minute=send_time.minute,
         args=[chat_id, analysis_time],
+        id=job_id,
+        replace_existing=True
     )
-    logging.info(f"""Задача {job_id} добавлена: анализ в {
+    logging.info(f"""Задача для чата {chat_id} добавлена в планировщик: анализ в {
                  analysis_time}, отправка в {send_time}.""")
+    list_scheduled_jobs()
 
 
 def list_scheduled_jobs():
@@ -121,12 +106,13 @@ def list_scheduled_jobs():
         logging.info(f"Job ID: {job.id}, trigger: {job.trigger}")
 
 
-def remove_schedule_from_scheduler(job_id):
+def remove_schedule_from_scheduler(chat_id):
+    job_id = f"schedule_{chat_id}"
     try:
         scheduler.remove_job(job_id)
-        logging.info(f"Задача {job_id} успешно удалена.")
+        logging.info(f"Задача {job_id} успешно удалена из планировщика.")
     except JobLookupError:
-        logging.warning(f"Задача {job_id} не найдена.")
+        logging.warning(f"Задача {job_id} не найдена в планировщике.")
 
 
 def clear_existing_jobs():
