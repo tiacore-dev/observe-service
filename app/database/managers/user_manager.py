@@ -31,8 +31,14 @@ class UserManager:
     def get_user_by_user_id(self, user_id):
         """Получаем пользователя по его ID"""
         with self.Session() as session:
-            user = session.query(User).filter_by(user_id=user_id).first()
-            return user
+            try:
+                user = session.query(User).filter(
+                    User.user_id == user_id).first()
+                return user
+            except Exception as e:
+                logging.error(
+                    f"Ошибка при получении пользователя {user_id}: {e}")
+                raise
 
     def delete_user(self, user_id):
         """Удаление пользователя по user_id"""
