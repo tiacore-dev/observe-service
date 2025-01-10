@@ -1,13 +1,13 @@
 import logging
 from sqlalchemy import text
 from app.database.models.chat import Chat
-# from app.database.db_globals import Session
+from app.database.db_globals import Session
 from app.utils import parse_time
 
 
 class ChatManager:
-    def __init__(self, session_factory):
-        self.Session = session_factory
+    def __init__(self):
+        self.Session = Session
 
     def add_chat(self, chat_id, chat_name=None):
         with self.Session() as session:

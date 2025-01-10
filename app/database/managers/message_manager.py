@@ -3,11 +3,12 @@ import logging
 from datetime import datetime
 from dateutil.parser import isoparse
 from app.database.models.messages import Message
+from app.database.db_globals import Session
 
 
 class MessageManager:
-    def __init__(self, session_factory):
-        self.Session = session_factory
+    def __init__(self):
+        self.Session = Session
 
     def add_message(self, timestamp, user_id, chat_id, text=None, s3_key=None):
         with self.Session() as session:
