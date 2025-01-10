@@ -1,4 +1,5 @@
 import uuid
+import logging
 from datetime import datetime
 from dateutil.parser import isoparse
 from app.database.models.messages import Message
@@ -25,7 +26,8 @@ class MessageManager:
                 session.commit()
                 # logging.info(f"Сообщение {message_id} успешно записано в базу данных.")
             except Exception as e:
-                # logging.error(f"Ошибка записи сообщения {message_id} в базу данных: {e}")
+                logging.error(f"""Ошибка записи сообщения {
+                              message_id} в базу данных: {e}""")
                 session.rollback()
 
     def get_filtered_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None):
@@ -95,3 +97,5 @@ class MessageManager:
                                        ).limit(limit).offset(offset)
 
                 return query.all(), total_count
+            except Exception as e:
+                logging.error(f"""Ошибка в базе данных: {e}""")

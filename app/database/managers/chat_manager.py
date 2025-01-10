@@ -41,10 +41,7 @@ class ChatManager:
 
     def get_all_chats(self):
         with self.Session() as session:
-            try:
-                return session.query(Chat).all()
-            except Exception as e:
-                raise
+            return session.query(Chat).all()
 
     def update_schedule(self, chat_id, schedule_analysis, prompt_id=None, analysis_time=None, send_time=None):
         """
