@@ -37,7 +37,7 @@ class CeleryConfig(ConfigFlask):
     result_backend = os.getenv(
         'CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
     # Таймаут соединения с брокером (в секундах)
-    BROKER_TRANSPORT_OPTIONS = {
+    broker_transport_options = {
         'visibility_timeout': 3600,  # Таймаут видимости задачи (1 час)
         'polling_interval': 2.0      # Интервал проверки новых задач
     }
