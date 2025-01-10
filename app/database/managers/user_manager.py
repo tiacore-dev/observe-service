@@ -38,9 +38,11 @@ class UserManager:
                     User.user_id == user_id).first()
                 if user:
                     logging.info(f"Пользователь найден: {user}")
+                    return user.to_dict()
                 else:
                     logging.warning(f"Пользователь с ID {user_id} не найден.")
-                return user.to_dict()
+                    return None
+
             except Exception as e:
                 logging.error(
                     f"Ошибка при получении пользователя {user_id}: {e}")

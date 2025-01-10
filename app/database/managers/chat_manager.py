@@ -31,9 +31,10 @@ class ChatManager:
                     Chat.chat_id == chat_id).first()
                 if chat:
                     logging.info(f"чат найден: {chat}")
+                    return chat.to_dict()
                 else:
                     logging.warning(f"Чат с ID {chat_id} не найден.")
-                return chat.to_dict()
+                    return None
             except Exception as e:
                 logging.error(
                     f"Ошибка при получении чата {chat_id}: {e}")
