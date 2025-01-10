@@ -26,7 +26,13 @@ services:
   celery:
     build: .
     command: >
-      celery -A celery_worker:celery worker -l info -E
+        sh -c "
+        celery -A celery_worker:celery worker --loglevel=info --queues=analyze_queue &
+        celery -A celery_worker:celery worker --loglevel=info --queues=save_queue &
+        celery -A celery_worker:celery worker --loglevel=info --queues=send_queue &
+        celery -A celery_worker:celery worker --loglevel=info --queues=default
+        "
+      #celery -A celery_worker:celery worker -l info -E
     environment:
       - REDIS_URL=redis://redis:6379/0
     depends_on:

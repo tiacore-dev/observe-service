@@ -19,7 +19,7 @@ BOT_TOKEN = os.getenv('TG_API_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 
 
-@shared_task(autoretry_for=(OperationalError,), retry_backoff=5, retry_kwargs={'max_retries': 3})
+@shared_task(autoretry_for=(OperationalError,), retry_backoff=5, retry_kwargs={'max_retries': 10}, queue='analyze_queue')
 def analyze_task(chat_id, analysis_time):
     """
     Анализирует сообщения в чате за указанный временной промежуток.
@@ -116,7 +116,7 @@ def analyze_task(chat_id, analysis_time):
     }
 
 
-@shared_task(autoretry_for=(OperationalError,), retry_backoff=5, retry_kwargs={'max_retries': 3})
+@shared_task(autoretry_for=(OperationalError,), retry_backoff=5, retry_kwargs={'max_retries': 10}, queue='save_queue')
 def save_analysis_result_task(data):
     """
     Сохраняет результат анализа в базу данных.
@@ -136,7 +136,7 @@ def save_analysis_result_task(data):
     return data
 
 
-@shared_task(autoretry_for=(OperationalError,), retry_backoff=5, retry_kwargs={'max_retries': 3})
+@shared_task(autoretry_for=(OperationalError,), retry_backoff=5, retry_kwargs={'max_retries': 10}, queue='send_queue')
 def send_analysis_result_task(data):
     """
     Отправляет результат анализа в Telegram.
