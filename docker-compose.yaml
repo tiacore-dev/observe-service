@@ -35,6 +35,7 @@ services:
         "
       #celery -A celery_worker:celery worker -l info -E
     environment:
+      - broker_url=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       redis:
