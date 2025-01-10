@@ -27,9 +27,9 @@ services:
     build: .
     command: >
         sh -c "
-        celery -A celery_worker:celery worker --loglevel=info --queues=analyze_queue &
-        celery -A celery_worker:celery worker --loglevel=info --queues=save_queue &
-        celery -A celery_worker:celery worker --loglevel=info --queues=send_queue &
+        celery -A celery_worker:celery worker --loglevel=info --queues=analyze_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=save_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=send_queue --concurrency=1 &
         celery -A celery_worker:celery worker --loglevel=info --queues=default
         "
       #celery -A celery_worker:celery worker -l info -E
