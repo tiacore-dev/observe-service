@@ -72,7 +72,7 @@ services:
     build:
       context: .
     extra_hosts:
-      - "redis:172.18.0.2/16"
+      - "redis:172.18.0.2"
     environment:
       - CONFIG_NAME=${ENV:-Development}
       - REDIS_URL=redis://redis:6379/0
