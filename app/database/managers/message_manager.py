@@ -46,7 +46,12 @@ class MessageManager:
                 query = query.filter(Message.user_id == user_id)
             if chat_id:
                 query = query.filter(Message.chat_id == chat_id)
-            return query.all()
+            try:
+                results = session.execute(query).scalars().all()
+                return results
+            except Exception as e:
+                logging.error(f"Ошибка выполнения запроса: {e}")
+                raise
 
     def get_paginated_messages(self, start_date=None, end_date=None, user_id=None, chat_id=None, limit=10, offset=0):
         with self.Session() as session:

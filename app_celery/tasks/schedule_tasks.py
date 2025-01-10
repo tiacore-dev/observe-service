@@ -14,6 +14,9 @@ load_dotenv()
 novosibirsk_tz = timezone('Asia/Novosibirsk')
 now = datetime.now(novosibirsk_tz)
 
+BOT_TOKEN = os.getenv('TG_API_TOKEN')
+CHAT_ID = os.getenv('CHAT_ID')
+
 
 @shared_task
 def analyze_task(chat_id, analysis_time):
@@ -23,11 +26,13 @@ def analyze_task(chat_id, analysis_time):
     logging.info(f"Начало анализа для чата {chat_id}")
     from app.database.managers.chat_manager import ChatManager
     from app.database.managers.message_manager import MessageManager
+    from app.utils.db_get import get_prompt
     chat_manager = ChatManager()
     message_manager = MessageManager()
 
     chat = chat_manager.get_chat_by_id(chat_id)
     if not chat:
+        logging.error(f"Чат {chat_id} не найден.")
         raise ValueError(f"Чат {chat_id} не найден.")
 
     now = datetime.now(novosibirsk_tz)
@@ -40,7 +45,7 @@ def analyze_task(chat_id, analysis_time):
         minute=analysis_time.minute,
         second=analysis_time.second,
         tzinfo=novosibirsk_tz
-    )
+    ).astimezone(novosibirsk_tz)
 
     analysis_end = datetime(
         year=now.year,
@@ -50,31 +55,53 @@ def analyze_task(chat_id, analysis_time):
         minute=analysis_time.minute,
         second=analysis_time.second,
         tzinfo=novosibirsk_tz
-    )
+    ).astimezone(novosibirsk_tz)
 
     logging.info(f"Диапазон анализа: {analysis_start} - {analysis_end}")
 
-    messages = message_manager.get_filtered_messages(
-        start_date=analysis_start.isoformat(),
-        end_date=analysis_end.isoformat(),
-        chat_id=chat_id
-    )
+    try:
+        messages = message_manager.get_filtered_messages(
+            start_date=analysis_start.isoformat(),
+            end_date=analysis_end.isoformat(),
+            chat_id=chat_id
+        )
+    except Exception as e:
+        logging.error(f"Ошибка при получении сообщений: {e}")
+        raise
+
     filters = {
         "chat_id": chat_id,
         "start_date": analysis_start.isoformat(),
         "end_date": analysis_end.isoformat(),
         "user_id": None
     }
+
     if not messages:
-        raise ValueError(f"Нет сообщений для анализа в чате {chat_id}.")
+        logging.warning(f"""Нет сообщений для анализа в чате {
+                        chat_id} за период {analysis_start} - {analysis_end}.""")
+        return {
+            "chat_id": chat_id,
+            "analysis_result": None,
+            "tokens_input": 0,
+            "tokens_output": 0,
+            "prompt_id": chat.default_prompt_id,
+            "filters": filters
+        }
 
-    messages = [msg.to_dict() for msg in messages]
-    prompt = get_prompt(
-        chat.default_prompt_id) or "Системный промпт для анализа."
+    logging.info(f"Сообщений для анализа найдено: {len(messages)}")
 
-    analysis_result, tokens_input, tokens_output = chatgpt_analyze(
-        prompt, messages
-    )
+    try:
+        messages = [msg.to_dict() for msg in messages]
+        prompt = get_prompt(chat.default_prompt_id)
+        if not prompt:
+            raise ValueError(
+                f"Промпт с ID {chat.default_prompt_id} не найден.")
+
+        analysis_result, tokens_input, tokens_output = chatgpt_analyze(
+            prompt, messages)
+    except Exception as e:
+        logging.error(f"Ошибка при анализе сообщений: {e}")
+        raise
 
     logging.info(f"Анализ завершён для чата {chat_id}.")
     return {
@@ -112,12 +139,10 @@ def send_analysis_result_task(data):
     Отправляет результат анализа в Telegram.
     """
     from telebot import TeleBot
-    bot_token = os.getenv('TG_API_TOKEN')
-    CHAT_ID = os.getenv('CHAT_ID')
 
     message_text = f"""Результат анализа для чата {
         data['chat_id']}:\n\n{data['analysis_result']}"""
-    bot = TeleBot(bot_token)
+    bot = TeleBot(BOT_TOKEN)
 
     try:
         bot.send_message(chat_id=CHAT_ID, text=message_text)
