@@ -41,7 +41,7 @@ def execute_analysis_and_send(chat_id, analysis_time):
     logging.info(f"Цепочка задач для чата {chat_id} запущена.")
 
 
-def sync_schedules():
+"""def sync_schedules():
     from app.database.managers.chat_manager import ChatManager
     chat_manager = ChatManager()
 
@@ -65,7 +65,7 @@ def sync_schedules():
             chat_id = job_id.replace("schedule_", "")
             if chat_id not in active_chat_ids:
                 scheduler.remove_job(job_id)
-                logging.info(f"Удалена неактуальная задача {job_id}.")
+                logging.info(f"Удалена неактуальная задача {job_id}.")"""
 
 
 def start_scheduler():
@@ -87,18 +87,6 @@ def start_scheduler():
     except Exception as e:
         logging.error(
             f"Ошибка при инициализации планировщика из базы данных: {e}")
-
-    # Добавляем задачу синхронизации
-    try:
-        scheduler.add_job(
-            sync_schedules,
-            'interval',
-            minutes=5,  # Интервал синхронизации
-            id='sync_schedules',
-            replace_existing=True
-        )
-    except Exception as e:
-        logging.error(f"Ошибка при добавлении задачи синхронизации: {e}")
 
     scheduler.start()
     logging.info("Планировщик успешно запущен.")
