@@ -24,7 +24,20 @@ class ChatManager:
 
     def get_chat_by_id(self, chat_id):
         with self.Session() as session:
-            return session.query(Chat).filter_by(chat_id=chat_id).first()
+            try:
+                logging.info(
+                    f"Открытие сессии для получения чата {chat_id}")
+                chat = session.query(Chat).filter(
+                    Chat.chat_id == chat_id).first()
+                if chat:
+                    logging.info(f"чат найден: {chat}")
+                else:
+                    logging.warning(f"Чат с ID {chat_id} не найден.")
+                return chat
+            except Exception as e:
+                logging.error(
+                    f"Ошибка при получении чата {chat_id}: {e}")
+                raise
 
     def update_chat_name(self, chat_id, new_name):
         with self.Session() as session:

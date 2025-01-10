@@ -34,5 +34,14 @@ def get_user_name(user_id):
 def get_chat_name(chat_id):
     from app.database.managers.chat_manager import ChatManager
     db = ChatManager()
-    chat = db.get_chat_by_id(chat_id)
-    return chat.chat_name
+    try:
+        chat = db.get_chat_by_id(chat_id)
+        if chat:
+            return chat.chat_name
+        else:
+            logging.warning(f"Чат с ID {chat_id} не найден.")
+            return None
+    except Exception as e:
+        logging.error(
+            f"Ошибка при получении имени чата {chat_id}: {e}")
+        raise
