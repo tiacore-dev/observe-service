@@ -53,17 +53,18 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
         x_port=1   # Учитываем X-Forwarded-Port
     )
 
+    # Инициализация базы данных
+    try:
+        database_url = app.config['SQLALCHEMY_DATABASE_URI']
+        engine, Session, Base = init_db(database_url)
+        set_db_globals(engine, Session, Base)
+        set_admin()
+        logging.info("База данных успешно инициализирована.")
+    except Exception as e:
+        logging.error(f"Ошибка при инициализации базы данных: {e}")
+        raise
+
     if enable_routes:
-        # Инициализация базы данных
-        try:
-            database_url = app.config['SQLALCHEMY_DATABASE_URI']
-            engine, Session, Base = init_db(database_url)
-            set_db_globals(engine, Session, Base)
-            set_admin()
-            logging.info("База данных успешно инициализирована.")
-        except Exception as e:
-            logging.error(f"Ошибка при инициализации базы данных: {e}")
-            raise
 
         # Инициализация JWT
         try:
