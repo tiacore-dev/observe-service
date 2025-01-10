@@ -31,9 +31,9 @@ def sync_chats_from_messages(bot):
             except Exception as e:
                 logging.info(f"Не удалось добавить чат {chat_id}: {e}")
         else:
-            if not existing_chat.chat_name:
+            if not existing_chat['chat_name']:
                 logging.info(f'''Удаляем чат с названием {
-                             existing_chat.chat_name}''')
+                             existing_chat['chat_name']}''')
                 chat_manager.delete_chat(chat_id)
             logging.info(f"Чат {chat_id} уже существует в базе данных.")
 
