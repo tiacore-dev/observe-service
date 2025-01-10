@@ -83,7 +83,7 @@ def analyze_task(chat_id, analysis_time):
             "analysis_result": None,
             "tokens_input": 0,
             "tokens_output": 0,
-            "prompt_id": chat.default_prompt_id,
+            "prompt_id": chat['default_prompt_id'],
             "filters": filters
         }
 
@@ -91,10 +91,10 @@ def analyze_task(chat_id, analysis_time):
 
     try:
         messages = [msg.to_dict() for msg in messages]
-        prompt = get_prompt(chat.default_prompt_id)
+        prompt = get_prompt(chat['default_prompt_id'])
         if not prompt:
             raise ValueError(
-                f"Промпт с ID {chat.default_prompt_id} не найден.")
+                f"Промпт с ID {chat['default_prompt_id']} не найден.")
 
         analysis_result, tokens_input, tokens_output = chatgpt_analyze(
             prompt, messages)
@@ -108,7 +108,7 @@ def analyze_task(chat_id, analysis_time):
         "analysis_result": analysis_result,
         "tokens_input": tokens_input,
         "tokens_output": tokens_output,
-        "prompt_id": chat.default_prompt_id,
+        "prompt_id": chat['default_prompt_id'],
         "filters": filters
     }
 
