@@ -40,7 +40,7 @@ class UserManager:
                     logging.info(f"Пользователь найден: {user}")
                 else:
                     logging.warning(f"Пользователь с ID {user_id} не найден.")
-                return user
+                return user.to_dict()
             except Exception as e:
                 logging.error(
                     f"Ошибка при получении пользователя {user_id}: {e}")

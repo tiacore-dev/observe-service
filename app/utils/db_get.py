@@ -21,7 +21,7 @@ def get_user_name(user_id):
     try:
         user = db.get_user_by_user_id(user_id)
         if user:
-            return user.username
+            return user['username']
         else:
             logging.warning(f"Пользователь с ID {user_id} не найден.")
             return None
@@ -37,7 +37,7 @@ def get_chat_name(chat_id):
     try:
         chat = db.get_chat_by_id(chat_id)
         if chat:
-            return chat.chat_name
+            return chat['chat_name']
         else:
             logging.warning(f"Чат с ID {chat_id} не найден.")
             return None
