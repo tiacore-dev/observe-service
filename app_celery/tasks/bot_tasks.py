@@ -3,7 +3,7 @@ import logging
 from celery import shared_task
 
 
-@shared_task
+@shared_task(queue='telegram_queue')
 def add_text_task(message, text):
     from app.database.managers.user_manager import UserManager
     from app.database.managers.message_manager import MessageManager
@@ -38,7 +38,7 @@ def add_text_task(message, text):
             f"Ошибка при записи сообщения от пользователя {user_id}: {e}")
 
 
-@shared_task
+@shared_task(queue='telegram_queue')
 def add_file_task(message, file_name):
     from app.database.managers.user_manager import UserManager
     from app.database.managers.message_manager import MessageManager
