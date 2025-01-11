@@ -5,6 +5,9 @@ load_dotenv()
 
 
 class ConfigFlask:
+    CELERY_BROKER_URL = 'redis://redis:6379/0'
+    result_backend = 'redis://redis:6379/0'
+    broker_transport = 'redis'
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SECRET_KEY = os.getenv('SECRET_KEY')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
@@ -33,9 +36,8 @@ class ProductionConfig(ConfigFlask):
 
 
 class CeleryConfig(ConfigFlask):
-    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
-    result_backend = os.getenv(
-        'CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+    CELERY_BROKER_URL = 'redis://redis:6379/0'
+    result_backend = 'redis://redis:6379/0'
     # Таймаут соединения с брокером (в секундах)
     broker_transport_options = {
         'visibility_timeout': 3600,  # Таймаут видимости задачи (1 час)
