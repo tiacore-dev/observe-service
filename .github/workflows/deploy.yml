@@ -24,8 +24,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -t ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
           cd apps/observe-service && 
           git pull origin master && 
-          ENV=Production docker compose down && 
-          ENV=Production docker compose up --build -d
+          docker compose down && 
+          docker compose up --build -d
           "
 
       - name: Deploy to Development
@@ -34,6 +34,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -t ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
           cd apps/observe-service-dev && 
           git pull origin dev && 
-          ENV=Development docker compose down && 
-          ENV=Development docker compose up --build -d
+          docker compose down && 
+          docker compose up --build -d
           "
