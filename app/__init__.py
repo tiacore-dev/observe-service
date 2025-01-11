@@ -32,8 +32,6 @@ load_dotenv()
 def create_app(config_name=None, enable_routes=False, enable_scheduler=False, enable_gateway=False):
     app = Flask(__name__)
 
-    # Используем CONFIG_NAME из окружения, если не передано явно
-    config_name = config_name or os.getenv('CONFIG_NAME', 'Development')
     # Установка секретного ключа для сессий
     # Выбор конфигурации
     if config_name == 'Development':
