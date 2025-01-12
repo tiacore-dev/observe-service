@@ -77,7 +77,7 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     command: >
-      gunicorn -c gunicorn.conf.py --pool=eventlet --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
+      gunicorn -c gunicorn.conf.py --worker-class eventlet --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     depends_on:
@@ -95,7 +95,7 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     command: >
-      gunicorn -c gunicorn.conf.py --pool=eventlet --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
+      gunicorn -c gunicorn.conf.py --worker-class eventlet --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
     depends_on:
       - redis
       - web
