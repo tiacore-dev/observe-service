@@ -125,7 +125,7 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
                 f"Ошибка при инициализации менеджера расписаний: {e}")
             raise
 
-        # Gateway маршруты
+    # Gateway маршруты
     if enable_gateway:
         try:
             from app.routes import gateway_bp

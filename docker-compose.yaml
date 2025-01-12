@@ -12,7 +12,7 @@ services:
       - ./redis.conf:/usr/local/etc/redis/redis.conf  # Монтируем файл конфигурации
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]  # Указываем путь к конфигу
     networks:
-      - observer_prod_network
+      - observer_network
 
 
   alembic:
@@ -21,7 +21,7 @@ services:
     volumes:
       - .:/app
     networks:
-      - observer_prod_network
+      - observer_network
 
   celery:
     build: .
@@ -43,7 +43,7 @@ services:
     volumes:
       - .:/app
     networks:
-      - observer_prod_network
+      - observer_network
 
 
   web:
@@ -66,7 +66,7 @@ services:
     command: >
        gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${FLASK_PORT} wsgi_web:app
     networks:
-      - observer_prod_network
+      - observer_network
 
   gateway:
     build:
@@ -84,7 +84,7 @@ services:
       - redis
       - web
     networks:
-      - observer_prod_network
+      - observer_network
 
   scheduler:
     build:
@@ -95,13 +95,13 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     command: >
-      gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
+      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
     depends_on:
       - redis
       - web
     networks:
-      - observer_prod_network
+      - observer_network
 
 networks:
-  observer_prod_network:
-    external: true
+  observer_network:
+    driver: bridge
