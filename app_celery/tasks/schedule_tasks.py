@@ -124,13 +124,14 @@ def save_analysis_result_task(data):
     logging.info(f"Сохранение результата анализа для чата {data['chat_id']}.")
     from app.database.managers.analysis_manager import AnalysisManager
     analysis_manager = AnalysisManager()
-    analysis_manager.save_analysis_result(
-        data["prompt_id"],
-        data["analysis_result"],
-        data['filters'],
-        data["tokens_input"],
-        data["tokens_output"]
-    )
+    if data['analysis_result']:
+        analysis_manager.save_analysis_result(
+            data["prompt_id"],
+            data["analysis_result"],
+            data['filters'],
+            data["tokens_input"],
+            data["tokens_output"]
+        )
 
     logging.info(f"Результат анализа сохранён для чата {data['chat_id']}.")
     return data
@@ -145,11 +146,14 @@ def send_analysis_result_task(data):
         logging.error(
             "Переданы некорректные данные в send_analysis_result_task.")
         return
-
-    chat = get_chat_name(data['chat_id'])
-    message_text = f"""Результат анализа для чата {
-        chat}:\n\n{data['analysis_result']}"""
     bot = TeleBot(BOT_TOKEN)
+    chat = get_chat_name(data['chat_id'])
+    if data['analysis_result']:
+        message_text = f"""Результат анализа для чата {
+            chat}:\n\n{data['analysis_result']}"""
+    else:
+        message_text = f"""Для чата {
+            chat} не удалось провести анализ."""
 
     try:
         bot.send_message(chat_id=CHAT_ID, text=message_text)
