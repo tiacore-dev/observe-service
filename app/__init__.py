@@ -65,6 +65,18 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
         logging.error(f"Ошибка при инициализации базы данных: {e}")
         raise
 
+        # Инициализация Redis
+    from redis import ConnectionPool, Redis
+    from gevent.lock import Semaphore
+
+    pool = ConnectionPool(
+        connection_class=Redis,
+        semaphore_class=Semaphore,
+        host='redis',  # Укажите имя хоста Redis-контейнера
+        port=6379,
+    )
+    app.redis_client = Redis(connection_pool=pool)
+
     if enable_routes:
 
         # Инициализация JWT

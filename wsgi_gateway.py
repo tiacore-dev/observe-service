@@ -1,6 +1,7 @@
 # autopep8: off
-#from gevent import monkey # pylint: disable=import-error
-#monkey.patch_all()
+from gevent import monkey # pylint: disable=import-error
+monkey.patch_all(ssl=False)
+
 
 from app import create_app
 import os
