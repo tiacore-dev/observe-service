@@ -12,7 +12,6 @@ from app.s3 import init_s3_manager
 from app.routes import register_routes
 from app.openai_funcs import init_openai
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
-from app.utils.scheduler import start_scheduler, clear_existing_jobs
 
 
 # Настройка логирования
@@ -29,19 +28,8 @@ logging.basicConfig(
 load_dotenv()
 
 
-def create_app(config_name=None, enable_routes=False, enable_scheduler=False, enable_gateway=False):
+def create_app():
     app = Flask(__name__)
-
-    # Установка секретного ключа для сессий
-
-    if config_name == 'Celery':
-        app.config.from_object('config.CeleryConfig')
-    else:
-        app.config.from_object('config.ConfigFlask')
-
-    app.config['broker_url'] = 'redis://redis:6379/0'
-    app.config['result_backend'] = 'redis://redis:6379/0'
-    app.config['REDIS_URL'] = 'redis://redis:6379/0'
 
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
@@ -62,50 +50,36 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
         logging.error(f"Ошибка при инициализации базы данных: {e}")
         raise
 
-        # Инициализация Redis
-    from redis import ConnectionPool, Redis
-    from gevent.lock import Semaphore
+    # Инициализация JWT
+    try:
+        JWTManager(app)
+        app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+        logging.info(f"""JWT инициализирован. {
+            app.config['JWT_ACCESS_TOKEN_EXPIRES']}""")
+    except Exception as e:
+        logging.error(f"Ошибка при инициализации JWT: {e}")
+        raise
 
-    pool = ConnectionPool(
-        connection_class=Redis,
-        semaphore_class=Semaphore,
-        host='redis',  # Укажите имя хоста Redis-контейнера
-        port=6379,
-    )
-    app.redis_client = Redis(connection_pool=pool)
+    # Регистрация маршрутов
+    try:
+        register_routes(app)
+        logging.info("Маршруты успешно зарегистрированы.")
+    except Exception as e:
+        logging.error(f"Ошибка при регистрации маршрутов: {e}")
+        raise
 
-    if enable_routes:
-
-        # Инициализация JWT
-        try:
-            JWTManager(app)
-            app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-            logging.info(f"""JWT инициализирован. {
-                app.config['JWT_ACCESS_TOKEN_EXPIRES']}""")
-        except Exception as e:
-            logging.error(f"Ошибка при инициализации JWT: {e}")
-            raise
-
-        # Регистрация маршрутов
-        try:
-            register_routes(app)
-            logging.info("Маршруты успешно зарегистрированы.")
-        except Exception as e:
-            logging.error(f"Ошибка при регистрации маршрутов: {e}")
-            raise
-
-        # Инициализация бота
-        try:
-            bot_token = os.getenv('TG_API_TOKEN')
-            bot = telebot.TeleBot(bot_token)
-            logging.info("Бот успешно инициализирован")
-            sync_chats_from_messages(bot)
-            update_usernames(bot)
-            bot.stop_bot()
-            logging.info("Бот успешно выполнил задачи и остановлен")
-        except Exception as e:
-            logging.error(f"Ошибка при инициализации бота: {e}")
-            raise
+    # Инициализация бота
+    try:
+        bot_token = os.getenv('TG_API_TOKEN')
+        bot = telebot.TeleBot(bot_token)
+        logging.info("Бот успешно инициализирован")
+        sync_chats_from_messages(bot)
+        update_usernames(bot)
+        bot.stop_bot()
+        logging.info("Бот успешно выполнил задачи и остановлен")
+    except Exception as e:
+        logging.error(f"Ошибка при инициализации бота: {e}")
+        raise
 
     # Инициализация OpenAI
     try:
@@ -115,33 +89,12 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
         logging.error(f"Ошибка при инициализации OpenAI: {e}")
         raise
 
-    if enable_gateway or enable_routes:
-        # Инициализация S3
-        try:
-            init_s3_manager()
-            logging.info("S3 менеджер успешно инициализирован.")
-        except Exception as e:
-            logging.error(f"Ошибка при инициализации S3: {e}")
-            raise
-
-    if enable_scheduler:
-        try:
-            clear_existing_jobs()
-            start_scheduler()
-            logging.info("Менеджер расписаний успешно инициализирован.")
-        except Exception as e:
-            logging.error(
-                f"Ошибка при инициализации менеджера расписаний: {e}")
-            raise
-
-    # Gateway маршруты
-    if enable_gateway:
-        try:
-            from app.routes import gateway_bp
-            app.register_blueprint(gateway_bp)
-            logging.info("Gateway маршруты успешно зарегистрированы.")
-        except Exception as e:
-            logging.error(f"Ошибка при регистрации Gateway маршрутов: {e}")
-            raise
+    # Инициализация S3
+    try:
+        init_s3_manager()
+        logging.info("S3 менеджер успешно инициализирован.")
+    except Exception as e:
+        logging.error(f"Ошибка при инициализации S3: {e}")
+        raise
 
     return app
