@@ -2,7 +2,6 @@ import logging
 import json
 import base64
 from io import BytesIO
-import requests
 from flask import Blueprint, jsonify, request
 from app.utils.bot_utils import add_text, add_file
 from app.openai_funcs.openai_funcs import transcribe_audio
