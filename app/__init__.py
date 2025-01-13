@@ -33,19 +33,16 @@ def create_app(config_name=None, enable_routes=False, enable_scheduler=False, en
     app = Flask(__name__)
 
     # Установка секретного ключа для сессий
-    # Выбор конфигурации
-    if config_name == 'Development':
-        app.config.from_object('config.DevelopmentConfig')
-    elif config_name == 'Production':
-        app.config.from_object('config.ProductionConfig')
-    elif config_name == 'Celery':
+
+    if config_name == 'Celery':
         app.config.from_object('config.CeleryConfig')
     else:
-        raise ValueError(f"Неизвестное значение config_name: {config_name}")
+        app.config.from_object('config.ConfigFlask')
 
     app.config['broker_url'] = 'redis://redis:6379/0'
     app.config['result_backend'] = 'redis://redis:6379/0'
     app.config['REDIS_URL'] = 'redis://redis:6379/0'
+
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,  # Используем 1 прокси для заголовка X-Forwarded-For

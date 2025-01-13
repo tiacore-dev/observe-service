@@ -27,11 +27,11 @@ services:
     build: .
     command: >
         sh -c "
-        celery -A celery_worker:celery worker --pool=prefork --loglevel=info --queues=analyze_queue --concurrency=1 &
-        celery -A celery_worker:celery worker --pool=prefork --loglevel=info --queues=save_queue --concurrency=1 &
-        celery -A celery_worker:celery worker  --pool=prefork --loglevel=info --queues=send_queue --concurrency=1 &
-        celery -A celery_worker:celery worker --pool=prefork --loglevel=info --queues=telegram_queue &
-        celery -A celery_worker:celery worker --pool=prefork --loglevel=info --queues=default
+        celery -A celery_worker:celery worker --loglevel=info --queues=analyze_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=save_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=send_queue --concurrency=1 &
+        celery -A celery_worker:celery worker --loglevel=info --queues=telegram_queue &
+        celery -A celery_worker:celery worker --loglevel=info --queues=default
         "
       #celery -A celery_worker:celery worker -l info -E
     environment:
@@ -77,7 +77,7 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     command: >
-      gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
+      gunicorn -c gunicorn.conf.py --worker_class=gevent --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     depends_on:
@@ -95,7 +95,7 @@ services:
       - 8.8.8.8
       - 1.1.1.1
     command: >
-      gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
+      gunicorn -c gunicorn.conf.py --worker_class=gevent --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
     depends_on:
       - redis
       - web

@@ -23,25 +23,14 @@ class ConfigFlask:
     TESTING = False
 
 
-class DevelopmentConfig(ConfigFlask):
-    DEBUG = True
-    SQLALCHEMY_ECHO = True
-    ENV = 'development'
-
-
-class ProductionConfig(ConfigFlask):
-    DEBUG = False
-    ENV = 'production'
-    JWT_ACCESS_TOKEN_EXPIRES = 7200  # Продолжительность токена увеличена
-
-
 class CeleryConfig(ConfigFlask):
     broker_url = 'redis://redis:6379/0'
     result_backend = 'redis://redis:6379/0'
     # Таймаут соединения с брокером (в секундах)
     broker_transport_options = {
-        'visibility_timeout': 3600,  # Таймаут видимости задачи (1 час)
-        'polling_interval': 2.0      # Интервал проверки новых задач
+        'visibility_timeout': 3600,  # Таймаут видимости задачи
+        'max_retries': 5,           # Количество попыток подключения
+        'retry_delay': 5            # Интервал между попытками
     }
 
     # Таймаут выполнения задачи
