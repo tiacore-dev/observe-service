@@ -12,6 +12,7 @@ from app.s3 import init_s3_manager
 from app.routes import register_routes
 from app.openai_funcs import init_openai
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
+from config import ConfigFlask
 
 
 # Настройка логирования
@@ -30,6 +31,8 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
+
+    app.config.from_object(ConfigFlask)
 
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
