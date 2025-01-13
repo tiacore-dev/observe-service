@@ -1,7 +1,6 @@
 import logging
 import json
 from io import BytesIO
-import backoff
 import openai
 from app.utils.db_get import get_chat_name, get_user_name
 
@@ -37,12 +36,6 @@ def transcribe_audio(audio, file_format):
         audio_file.close()
 
 
-@backoff.on_exception(
-    backoff.expo,
-    (openai.OpenAIError, ConnectionError),  # Исправленный импорт
-    max_tries=5,
-    max_time=30  # Максимальное время ожидания
-)
 def chatgpt_analyze(prompt, messages):
     """
     Запускает анализ набора сообщений через OpenAI API с возможностью отправки изображений.
