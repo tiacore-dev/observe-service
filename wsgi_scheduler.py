@@ -1,7 +1,6 @@
 # autopep8: off
-#import eventlet
-#eventlet.monkey_patch()
-
+from gevent import monkey # pylint: disable=import-error
+monkey.patch_all()
 
 from app import create_app
 import os
