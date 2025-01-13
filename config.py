@@ -5,9 +5,6 @@ load_dotenv()
 
 
 class ConfigFlask:
-    CELERY_BROKER_URL = 'redis://redis:6379/0'
-    result_backend = 'redis://redis:6379/0'
-    broker_transport = 'redis'
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SECRET_KEY = os.getenv('SECRET_KEY')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
@@ -21,33 +18,3 @@ class ConfigFlask:
     CORS_ORIGINS = os.getenv('ORIGIN', '*')
     DEBUG = False
     TESTING = False
-
-
-class CeleryConfig(ConfigFlask):
-    broker_url = 'redis://redis:6379/0'
-    result_backend = 'redis://redis:6379/0'
-    # Таймаут соединения с брокером (в секундах)
-    broker_transport_options = {
-        'visibility_timeout': 3600,  # Таймаут видимости задачи
-        'max_retries': 5,           # Количество попыток подключения
-        'retry_delay': 5            # Интервал между попытками
-    }
-
-    # Таймаут выполнения задачи
-    # Мягкий лимит на выполнение задачи (в секундах)
-    task_soft_time_limit = 300
-    task_time_limit = 600       # Жесткий лимит на выполнение задачи
-
-    # Максимальное количество попыток выполнения задачи
-    task_max_retries = 5
-
-    # Настройки пула воркеров
-    worker_concurrency = 4  # Количество воркеров
-    worker_prefetch_multiplier = 1  # Количество задач на одного воркера
-
-    # Мониторинг и логи
-    worker_hijack_root_logger = False  # Отключение перехвата логов
-    task_track_started = True          # Отслеживание статуса "started"
-    worker_log_format = (
-        '[%(asctime)s: %(levelname)s/%(processName)s] %(message)s'
-    )

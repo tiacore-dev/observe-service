@@ -7,8 +7,6 @@ services:
     networks:
       - observer_network
 
-
-
   web:
     tty: true
     stdin_open: true
@@ -18,10 +16,7 @@ services:
       - 1.1.1.1
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
-    environment:
-      - REDIS_URL=redis://redis:6379/0
     depends_on:
-      - celery
       - alembic
     volumes:
       - .:/app
