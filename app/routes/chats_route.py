@@ -30,7 +30,6 @@ def update_schedule(chat_id):
     send_time = data.get('send_time')
 
     from app.database.managers.chat_manager import ChatManager
-    from app.utils.scheduler import add_schedule_to_scheduler, remove_schedule_from_scheduler
     chat_manager = ChatManager()
 
     try:
@@ -42,13 +41,6 @@ def update_schedule(chat_id):
         # Обновляем расписание в базе
         chat_manager.update_schedule(
             chat_id, schedule_analysis, prompt_id, analysis_time, send_time)
-
-        # Удаляем старую задачу, если была
-        remove_schedule_from_scheduler(chat_id)
-
-        if schedule_analysis:
-            # Если расписание включено, добавляем новую задачу
-            add_schedule_to_scheduler(chat_id, analysis_time, send_time)
 
         logging.info(f"Расписание для чата {chat_id} успешно обновлено.")
         return jsonify({'message': 'Расписание успешно обновлено'}), 200
