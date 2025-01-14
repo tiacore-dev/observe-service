@@ -107,8 +107,8 @@ def get_analysis_detail(analysis_id):
         if not analysis:
             logging.warning(f"Анализ с analysis_id: {analysis_id} не найден")
             return jsonify({'error': 'Analysis not found'}), 404
-        logging.info(f"Детали анализа с analysis_id: {
-                     analysis_id} успешно получены")
+        logging.info(f"""Детали анализа с analysis_id: {
+                     analysis_id} успешно получены""")
         return jsonify(analysis), 200
     except Exception as e:
         logging.error(f"Ошибка при получении деталей анализа: {str(e)}")

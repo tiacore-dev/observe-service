@@ -2,31 +2,11 @@ import logging
 import json
 import base64
 from io import BytesIO
-import requests
 from flask import Blueprint, jsonify, request
-from app_celery.tasks import add_text_task, add_file_task
+from app.utils.bot_utils import add_text, add_file
 from app.openai_funcs.openai_funcs import transcribe_audio
 
 gateway_bp = Blueprint('gateway', __name__)
-
-
-def test_requests():
-    url = "https://httpbin.org/get"
-    try:
-        response = requests.get(url, timeout=300)
-        if response.status_code == 200:
-            logging.info("Библиотека requests работает корректно.")
-            logging.info("Ответ сервера:")
-            logging.info(response.json())
-            # Пример возврата результата
-            return jsonify({"message": "Успешно обработано"}), 200
-        else:
-            logging.warning(f"Сервер вернул статус: {response.status_code}")
-            return jsonify({"message": "Ошибка"}), response.status_code
-    except requests.exceptions.RequestException as e:
-        logging.error("Ошибка при выполнении запроса:")
-        logging.error(e)
-        return jsonify({"message": e}), response.status_code
 
 
 # Эндпоинт для получения данных от первого бота
@@ -125,23 +105,23 @@ def upload_file():
 
 def handle_text(message):
     text = message.get('text')
-    add_text_task.delay(message, text)
+    add_text(message, text)
 
 
 def handle_photo(message, decoded_file, file_name, s3_manager, bucket_name):
     file_stream = BytesIO(decoded_file)
     s3_manager.upload_file(file_stream, bucket_name, file_name)
-    add_file_task.delay(message, file_name)
+    add_file(message, file_name)
 
 
 def handle_document(message, decoded_file, file_name, s3_manager, bucket_name):
     file_stream = BytesIO(decoded_file)
     s3_manager.upload_file(file_stream, bucket_name, file_name)
-    add_file_task.delay(message, file_name)
+    add_file(message, file_name)
 
 
 def handle_voice(message, decoded_file):
     # Дополнительно: транскрибируем аудио
     text = transcribe_audio(decoded_file, 'ogg')
     logging.info(text)
-    add_text_task.delay(message, text)
+    add_text(message, text)

@@ -1,20 +1,4 @@
 services:
-  redis:
-    image: redis:alpine
-    ports:
-      - "${REDIS_PORT}:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf  # Монтируем файл конфигурации
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]  # Указываем путь к конфигу
-    networks:
-      - observer_network
-
-
   alembic:
     build: .
     command: alembic upgrade head
@@ -22,28 +6,6 @@ services:
       - .:/app
     networks:
       - observer_network
-
-  celery:
-    build: .
-    command: >
-        sh -c "
-        celery -A celery_worker:celery worker --loglevel=info --queues=analyze_queue --concurrency=1 &
-        celery -A celery_worker:celery worker --loglevel=info --queues=save_queue --concurrency=1 &
-        celery -A celery_worker:celery worker --loglevel=info --queues=send_queue --concurrency=1 &
-        celery -A celery_worker:celery worker --loglevel=info --queues=telegram_queue &
-        celery -A celery_worker:celery worker --loglevel=info --queues=default
-        "
-      #celery -A celery_worker:celery worker -l info -E
-    environment:
-      - REDIS_URL=redis://redis:6379/0
-    depends_on:
-      redis:
-        condition: service_healthy
-    volumes:
-      - .:/app
-    networks:
-      - observer_network
-
 
   web:
     tty: true
@@ -54,55 +16,17 @@ services:
       - 1.1.1.1
     ports:
       - "${FLASK_PORT}:${FLASK_PORT}"
-    environment:
-      - REDIS_URL=redis://redis:6379/0
-      - CONFIG_NAME=${ENV:-Development}
     depends_on:
-      - celery
       - alembic
     volumes:
       - .:/app
       - ./shared_temp:/shared_temp
     command: >
-       gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${FLASK_PORT} wsgi_web:app
+       gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${FLASK_PORT} run:app
     networks:
       - observer_network
 
-  gateway:
-    build:
-      context: .
-    environment:
-      - CONFIG_NAME=${ENV:-Development}
-      - REDIS_URL=redis://redis:6379/0
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    command: >
-      gunicorn -c gunicorn.conf.py --worker-class gevent --bind 0.0.0.0:${GATEWAY_PORT} wsgi_gateway:app
-    ports:
-      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
-    depends_on:
-      - redis
-      - web
-    networks:
-      - observer_network
 
-  scheduler:
-    build:
-      context: .
-    environment:
-      - CONFIG_NAME=${ENV:-Development} # Указывает среду (по умолчанию Development)
-      - REDIS_URL=redis://redis:6379/0
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    command: >
-      gunicorn -c gunicorn.conf.py --bind 0.0.0.0:${SCHEDULER_PORT} wsgi_scheduler:app
-    depends_on:
-      - redis
-      - web
-    networks:
-      - observer_network
 
 networks:
   observer_network:
