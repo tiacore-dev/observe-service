@@ -13,18 +13,18 @@
     </ol>
 </nav>
 
-<h2>Edit Prompt</h2>
+<h2>Редактировать промпт</h2>
 
 <form id="editPromptForm" data-prompt-id="{{ prompt_id }}">
     <div class="mb-3">
-        <label for="prompt_name" class="form-label">Prompt Name</label>
+        <label for="prompt_name" class="form-label">Название</label>
         <input type="text" class="form-control" id="prompt_name" name="prompt_name" value="{{ prompt_name }}" required>
     </div>
     <div class="mb-3">
-        <label for="text" class="form-label">Prompt Text</label>
+        <label for="text" class="form-label">Текст</label>
         <textarea class="form-control" id="text" name="text" rows="4" required>{{ prompt_text }}</textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Save changes</button>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
 </form>
 
 {% endblock %}

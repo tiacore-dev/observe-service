@@ -33,13 +33,13 @@ $(document).ready(function () {
     $('#start_date').daterangepicker({
         singleDatePicker: true,
         autoApply: true,
-        locale: { format: 'DD-MM-YYYY' },
+        locale: { format: 'DD.MM.YYYY' },
     });
 
     $('#end_date').daterangepicker({
         singleDatePicker: true,
         autoApply: true,
-        locale: { format: 'DD-MM-YYYY' },
+        locale: { format: 'DD.MM.YYYY' },
     });
 
     function loadPrompts() {

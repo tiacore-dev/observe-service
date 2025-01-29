@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Authenticated!</h2>
-<p>Your access token: <span id="token">{{ token }}</span></p>
+<h2>Вы аторизованы!</h2>
+<p>Ваш токен доступа: <span id="token">{{ token }}</span></p>
 <div id="loginAlert" class="mt-3"></div>
 <script>
     const accessToken = "{{ token }}";
