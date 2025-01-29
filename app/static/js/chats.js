@@ -97,10 +97,14 @@ $(document).ready(function () {
                     <input type="checkbox" class="schedule-toggle" data-chat-id="${chat.chat_id}" ${chat.schedule_analysis ? 'checked' : ''}>
                 </td>
                 <td>
-                    <input type="time" class="form-control analysis-time" data-chat-id="${chat.chat_id}" value="${chat.analysis_time || ''}">
+                    <select class="form-control analysis-time" data-chat-id="${chat.chat_id}">
+                        ${generateHourOptions(chat.analysis_time)}
+                    </select>
                 </td>
                 <td>
-                    <input type="time" class="form-control send-time" data-chat-id="${chat.chat_id}" value="${chat.send_time || ''}">
+                    <select class="form-control send-time" data-chat-id="${chat.chat_id}">
+                        ${generateHourOptions(chat.send_time)}
+                    </select>
                 </td>
                 <td>
                     <button class="btn btn-primary save-settings-btn" data-chat-id="${chat.chat_id}">Сохранить</button>
@@ -121,8 +125,8 @@ $(document).ready(function () {
             const chatId = $(this).data('chat-id');
             const promptId = $(`.prompt-select[data-chat-id="${chatId}"]`).val();
             const scheduleAnalysis = $(`.schedule-toggle[data-chat-id="${chatId}"]`).is(':checked');
-            const analysisTime = $(`.analysis-time[data-chat-id="${chatId}"]`).val();
-            const sendTime = $(`.send-time[data-chat-id="${chatId}"]`).val();
+            const analysisTime = $(`.analysis-time[data-chat-id="${chatId}"]`).val() + ':00';
+            const sendTime = $(`.send-time[data-chat-id="${chatId}"]`).val() + ':00';
     
             saveSettings(chatId, promptId, scheduleAnalysis, analysisTime, sendTime);
         });
@@ -183,4 +187,14 @@ $(document).ready(function () {
             },
         });
     });
+    
+    function generateHourOptions(selectedTime) {
+        let options = '';
+        for (let i = 0; i < 24; i++) {
+            const hour = i.toString().padStart(2, '0');
+            const selected = selectedTime && selectedTime.startsWith(hour) ? 'selected' : '';
+            options += `<option value="${hour}" ${selected}>${hour}:00</option>`;
+        }
+        return options;
+    }
 });
