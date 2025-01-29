@@ -193,7 +193,7 @@ $(document).ready(function () {
         messagesTableBody.empty();
 
         paginatedMessages.forEach(msg => {
-            const date = msg.timestamp ? moment(msg.timestamp).format('DD-MM-YYYY HH:mm:ss') : 'Не указано';
+            const date = msg.timestamp ? moment(msg.timestamp).format('DD.MM.YYYY HH:mm:ss') : 'Не указано';
             const userId = msg.user_id || 'Не указано';
             const chatId = msg.chat_id || 'Не указано';
             const text = msg.text || 'Пустое сообщение';
@@ -212,8 +212,8 @@ $(document).ready(function () {
     }
 
     function getFilters() {
-        const start_date = moment($('#start_date').val(), 'DD-MM-YYYY').format('YYYY-MM-DD');
-        const end_date = moment($('#end_date').val(), 'DD-MM-YYYY').format('YYYY-MM-DD');
+        const start_date = moment($('#start_date').val(), 'DD.MM.YYYY').format('YYYY-MM-DD');
+        const end_date = moment($('#end_date').val(), 'DD.MM.YYYY').format('YYYY-MM-DD');
         const user_id = $('#user_id').val();
         const chat_id = $('#chat_id').val();
 
