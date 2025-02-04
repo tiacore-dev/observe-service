@@ -51,9 +51,9 @@ $(document).ready(function () {
                                 <div class="dropdown">
                                     <span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">&#x22EE;</span>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="/prompt/${prompt.prompt_id}/view">View</a>
-                                        <a class="dropdown-item" href="/prompt/${prompt.prompt_id}">Edit</a>
-                                        <a class="dropdown-item delete-prompt" href="#" data-id="${prompt.prompt_id}">Delete</a>
+                                        <a class="dropdown-item" href="/prompt/${prompt.prompt_id}/view">Подробнее</a>
+                                        <a class="dropdown-item" href="/prompt/${prompt.prompt_id}">Редактировать</a>
+                                        <a class="dropdown-item delete-prompt" href="#" data-id="${prompt.prompt_id}">Удалить</a>
                                     </div>
                                 </div>
                             </td>
