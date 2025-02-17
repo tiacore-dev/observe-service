@@ -141,11 +141,12 @@ def get_all_messages_for_analysis():
 
         logging.info(f"Найдено {len(messages)} сообщений для анализа.")
         for msg in messages:
-        logging.info(f"Обрабатываем сообщение: {msg}, Тип: {type(msg)}")
+            logging.info(f"Обрабатываем сообщение: {msg}, Тип: {type(msg)}")
 
-        if not hasattr(msg, 'to_dict'):
-            logging.error(f"Ошибка: объект {msg} не имеет метода `to_dict()`")
-            raise TypeError(f"Объект {msg} не поддерживает `to_dict()`")
+            if not hasattr(msg, 'to_dict'):
+                logging.error(
+                    f"Ошибка: объект {msg} не имеет метода `to_dict()`")
+                raise TypeError(f"Объект {msg} не поддерживает `to_dict()`")
 
         return jsonify({'messages': [msg.to_dict() for msg in messages]}), 200
     except Exception as e:
