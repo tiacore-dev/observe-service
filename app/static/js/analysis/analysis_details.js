@@ -30,16 +30,9 @@ $(document).ready(function () {
     function formatDate(timestamp) {
         if (!timestamp) return "Не указано";
     
-        const date = new Date(timestamp);
-        return date.toLocaleString("ru-RU", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-        }).replace(",", ""); // Убираем запятую между датой и временем
+        return moment.utc(timestamp).local().format("DD.MM.YYYY HH:mm:ss");
     }
+    
     
 
     function loadAnalysisDetails(analysisId) {

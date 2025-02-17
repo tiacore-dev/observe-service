@@ -23,6 +23,13 @@ $(document).ready(function () {
         });
     }
 
+    function formatDate(timestamp) {
+        if (!timestamp) return "Не указано";
+    
+        return moment.utc(timestamp).local().format("DD.MM.YYYY HH:mm:ss");
+    }
+    
+
     function loadAnalyses() {
         $('#loadingIndicator').show();
         $.ajax({
@@ -50,7 +57,7 @@ $(document).ready(function () {
                             <td>${rowNumber}</td>
                             <td>${analysis.prompt_name || 'Не указано'}</td>
                             <td>${trimmedFilters}</td>
-                            <td>${new Date(analysis.timestamp).toLocaleString("ru-RU")}</td>
+                            <td>${formatDate(analysis.timestamp)}</td>
                         </tr>`;
                     tableBody.append(row);
                 });
