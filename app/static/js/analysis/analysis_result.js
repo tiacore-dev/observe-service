@@ -50,7 +50,7 @@ $(document).ready(function () {
                             <td>${rowNumber}</td>
                             <td>${analysis.prompt_name || 'Не указано'}</td>
                             <td>${trimmedFilters}</td>
-                            <td>${new Date(analysis.timestamp).toLocaleString("ru-RU", { timeZone: "Asia/Novosibirsk" })}</td>
+                            <td>${new Date(analysis.timestamp).toLocaleString("ru-RU")}</td>
                         </tr>`;
                     tableBody.append(row);
                 });
