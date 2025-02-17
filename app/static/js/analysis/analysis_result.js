@@ -23,6 +23,18 @@ $(document).ready(function () {
         });
     }
 
+    function formatDate(timestamp) {
+        if (!timestamp) {
+            console.log("formatDate: timestamp отсутствует или null", timestamp);
+            return "Не указано";
+        }
+    
+        console.log("formatDate: обработка timestamp", timestamp);
+        return moment.utc(timestamp).local().format("DD.MM.YYYY HH:mm:ss");
+    }
+    
+    
+
     function loadAnalyses() {
         $('#loadingIndicator').show();
         $.ajax({
@@ -40,6 +52,8 @@ $(document).ready(function () {
                     tableBody.append('<tr><td colspan="4">Нет доступных анализов.</td></tr>');
                     return;
                 }
+                console.log("Полученные анализы:", response.analyses);
+
     
                 response.analyses.forEach(function (analysis, index) {
                     const rowNumber = offset + index + 1;
@@ -50,7 +64,7 @@ $(document).ready(function () {
                             <td>${rowNumber}</td>
                             <td>${analysis.prompt_name || 'Не указано'}</td>
                             <td>${trimmedFilters}</td>
-                            <td>${new Date(analysis.timestamp).toLocaleString("ru-RU", { timeZone: "Asia/Novosibirsk" })}</td>
+                            <td>${formatDate(analysis.timestamp)}</td>
                         </tr>`;
                     tableBody.append(row);
                 });

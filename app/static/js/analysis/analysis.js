@@ -7,8 +7,6 @@ $(document).ready(function () {
     let currentPage = 1; // Текущая страница
     const pageSize = 10; // Количество сообщений на странице
 
-
-
     if (!token) {
         window.location.href = '/';
     } else {
@@ -30,8 +28,6 @@ $(document).ready(function () {
             },
         });
     }
-
-    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Настройка диапазона дат
     $('#start_date').daterangepicker({
@@ -191,27 +187,24 @@ $(document).ready(function () {
             fetchPaginatedMessages(getFilters());
         });
     }
-
+    
     function displayMessages() {
         const messagesTableBody = $('#messagesTable tbody');
         messagesTableBody.empty();
-
+    
         paginatedMessages.forEach(msg => {
- 
-        const date = msg.timestamp 
-            ? moment.utc(msg.timestamp).local().format('DD.MM.YYYY HH:mm:ss') 
-            : 'Не указано';
-
-            console.log(`Серверное UTC время: ${msg.timestamp}, Локальное время: ${date}`);
- 
+            const localDate = msg.timestamp 
+                ? moment.utc(msg.timestamp).local().format('DD.MM.YYYY HH:mm:ss') 
+                : 'Не указано';
+    
             const userId = msg.user_id || 'Не указано';
             const chatId = msg.chat_id || 'Не указано';
             const text = msg.text || 'Пустое сообщение';
             const s3Key = msg.s3_key || 'Не указано';
-
+    
             messagesTableBody.append(`
                 <tr>
-                    <td>${date}</td>
+                    <td>${localDate}</td>
                     <td>${userId}</td>
                     <td>${chatId}</td>
                     <td>${text}</td>
@@ -220,21 +213,15 @@ $(document).ready(function () {
             `);
         });
     }
+    
 
     function getFilters() {
-        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const start_date = moment($('#start_date').val(), 'DD.MM.YYYY').startOf('day').format('YYYY-MM-DD HH:mm:ss');
-        const end_date = moment($('#end_date').val(), 'DD.MM.YYYY').endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        const start_date = $('#start_date').val() ? moment($('#start_date').val(), 'DD.MM.YYYY').startOf('day').utc().format('YYYY-MM-DD HH:mm:ss') : null;
+        const end_date = $('#end_date').val() ? moment($('#end_date').val(), 'DD.MM.YYYY').endOf('day').utc().format('YYYY-MM-DD HH:mm:ss') : null;
         const user_id = $('#user_id').val();
         const chat_id = $('#chat_id').val();
     
-        return {
-            start_date,
-            end_date,
-            user_id,
-            chat_id,
-            timezone: userTimezone // Передаем таймзону пользователя
-        };
+        return { start_date, end_date, user_id, chat_id };
     }
     
 
@@ -262,7 +249,12 @@ $(document).ready(function () {
             return;
         }
     
-        const filters = getFilters(); 
+        const filters = {
+            start_date: $('#start_date').val() || null,
+            end_date: $('#end_date').val() || null,
+            user_id: $('#user_id').val() || null,
+            chat_id: $('#chat_id').val() || null,
+        };
     
         $('#loadingIcon').show();
         $.ajax({
