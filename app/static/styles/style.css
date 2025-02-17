@@ -231,3 +231,9 @@ th {
 .file-input-group .remove-file-btn {
     margin-top: 10px; /* Отступ сверху для кнопки удаления */
 }
+
+.logo-img {
+    height: 40px; /* Размер лого */
+    width: auto;
+    border-radius: 5px; /* Скругление углов, если нужно */
+}
