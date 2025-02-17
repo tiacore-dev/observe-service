@@ -132,7 +132,7 @@ def get_all_messages_for_analysis():
         logging.info(f"Содержимое `messages`: {messages}")
         if not isinstance(messages, list):
             # Принудительно превращаем в список, если вдруг пришел один объект
-        messages = [messages]
+            messages = [messages]
 
         logging.info(f"После преобразования `messages`: {type(messages)}")
         # Преобразуем время сообщений обратно в локальный часовой пояс пользователя
