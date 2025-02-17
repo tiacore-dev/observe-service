@@ -128,26 +128,6 @@ def get_all_messages_for_analysis():
             start_date=start_date, end_date=end_date, user_id=user_id, chat_id=chat_id
         )
 
-        logging.info(f"Тип `messages`: {type(messages)}")
-        logging.info(f"Содержимое `messages`: {messages}")
-        if not isinstance(messages, list):
-            # Принудительно превращаем в список, если вдруг пришел один объект
-            messages = [messages]
-
-        logging.info(f"После преобразования `messages`: {type(messages)}")
-        # Преобразуем время сообщений обратно в локальный часовой пояс пользователя
-        messages = [convert_message_time(msg, user_timezone)
-                    for msg in messages]
-
-        logging.info(f"Найдено {len(messages)} сообщений для анализа.")
-        for msg in messages:
-            logging.info(f"Обрабатываем сообщение: {msg}, Тип: {type(msg)}")
-
-            if not hasattr(msg, 'to_dict'):
-                logging.error(
-                    f"Ошибка: объект {msg} не имеет метода `to_dict()`")
-                raise TypeError(f"Объект {msg} не поддерживает `to_dict()`")
-
         return jsonify({'messages': [msg.to_dict() for msg in messages]}), 200
     except Exception as e:
         logging.error(f"Ошибка при получении сообщений для анализа: {str(e)}")
