@@ -28,10 +28,15 @@ $(document).ready(function () {
     }
 
     function formatDate(timestamp) {
-        if (!timestamp) return "Не указано";
+        if (!timestamp) {
+            console.log("formatDate: timestamp отсутствует или null", timestamp);
+            return "Не указано";
+        }
     
+        console.log("formatDate: обработка timestamp", timestamp);
         return moment.utc(timestamp).local().format("DD.MM.YYYY HH:mm:ss");
     }
+    
     
     
 

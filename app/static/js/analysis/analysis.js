@@ -187,7 +187,7 @@ $(document).ready(function () {
             fetchPaginatedMessages(getFilters());
         });
     }
-
+    
     function displayMessages() {
         const messagesTableBody = $('#messagesTable tbody');
         messagesTableBody.empty();
