@@ -191,17 +191,20 @@ $(document).ready(function () {
     function displayMessages() {
         const messagesTableBody = $('#messagesTable tbody');
         messagesTableBody.empty();
-
+    
         paginatedMessages.forEach(msg => {
-            const date = msg.timestamp ? moment(msg.timestamp).format('DD.MM.YYYY HH:mm:ss') : 'Не указано';
+            const localDate = msg.timestamp 
+                ? moment.utc(msg.timestamp).local().format('DD.MM.YYYY HH:mm:ss') 
+                : 'Не указано';
+    
             const userId = msg.user_id || 'Не указано';
             const chatId = msg.chat_id || 'Не указано';
             const text = msg.text || 'Пустое сообщение';
             const s3Key = msg.s3_key || 'Не указано';
-
+    
             messagesTableBody.append(`
                 <tr>
-                    <td>${date}</td>
+                    <td>${localDate}</td>
                     <td>${userId}</td>
                     <td>${chatId}</td>
                     <td>${text}</td>
@@ -210,20 +213,17 @@ $(document).ready(function () {
             `);
         });
     }
+    
 
     function getFilters() {
-        const start_date = moment($('#start_date').val(), 'DD.MM.YYYY').format('YYYY-MM-DD');
-        const end_date = moment($('#end_date').val(), 'DD.MM.YYYY').format('YYYY-MM-DD');
+        const start_date = $('#start_date').val() ? moment($('#start_date').val(), 'DD.MM.YYYY').startOf('day').utc().format('YYYY-MM-DD HH:mm:ss') : null;
+        const end_date = $('#end_date').val() ? moment($('#end_date').val(), 'DD.MM.YYYY').endOf('day').utc().format('YYYY-MM-DD HH:mm:ss') : null;
         const user_id = $('#user_id').val();
         const chat_id = $('#chat_id').val();
-
-        return {
-            start_date,
-            end_date,
-            user_id,
-            chat_id,
-        };
+    
+        return { start_date, end_date, user_id, chat_id };
     }
+    
 
     $('#filterButton').on('click', function () {
         const filters = getFilters();
