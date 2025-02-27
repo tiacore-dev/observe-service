@@ -7,9 +7,11 @@ class User(Base):
 
     user_id = Column(BigInteger, primary_key=True, autoincrement=False)
     username = Column(String)  # Имя пользователя
+    login = Column(String)
 
     def to_dict(self):
         return {
             "user_id": self.user_id,
-            "username": self.username
+            "username": self.username,
+            "login": self.login
         }

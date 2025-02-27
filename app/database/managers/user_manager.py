@@ -8,9 +8,9 @@ class UserManager:
     def __init__(self):
         self.Session = Session
 
-    def add_user(self, user_id, username=None):
+    def add_user(self, user_id, username=None, login=None):
         """Добавляем пользователя стандартно"""
-        new_user = User(user_id=user_id, username=username)
+        new_user = User(user_id=user_id, username=username, login=login)
         with self.Session() as session:
             try:
                 session.add(new_user)
@@ -90,6 +90,25 @@ class UserManager:
                                  user_id} обновлено на {username}.")
                 else:
                     logging.warning(f"Пользователь {user_id} не найден.""")
+            except Exception as e:
+                session.rollback()
+                logging.error(
+                    f"Ошибка при обновлении имени пользователя {user_id}: {e}")
+                raise
+
+    def update_login(self, user_id, login):
+        """Обновляем имя пользователя"""
+        with self.Session() as session:
+            try:
+                user_in_db = session.query(User).filter_by(
+                    user_id=user_id).first()
+                if user_in_db:
+                    user_in_db.login = login
+                    session.commit()
+                    logging.info(f"""Имя аккаунта {
+                                 user_id} обновлено на {login}.""")
+                else:
+                    logging.warning(f"Пользователь {user_id} не найден.")
             except Exception as e:
                 session.rollback()
                 logging.error(

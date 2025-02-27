@@ -53,6 +53,9 @@ def update_usernames(bot):
         try:
             # Получаем информацию о пользователе через Telegram API
             user_info = bot.get_chat(user.user_id)
+            login = f"@{user_info.username}" if user_info.username else None
+
+            db.update_login(user.user_id, login)
             username = f"{user_info.first_name}"
             if user_info.last_name:
                 username += f" {user_info.last_name}"
