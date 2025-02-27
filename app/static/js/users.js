@@ -62,6 +62,7 @@ $(document).ready(function () {
             const userRow = $(`
                 <tr>
                     <td>${user.user_id}</td>
+                    <td>${user.login}</td>
                     <td>
                         <input type="text" class="form-control username-input" data-user-id="${user.user_id}" value="${user.username || ''}">
                     </td>
