@@ -31,3 +31,4 @@ services:
 networks:
   observer_network:
     external: true
+    name: ${OBSERVER_NETWORK}
