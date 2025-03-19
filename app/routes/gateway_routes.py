@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 from flask import Blueprint, jsonify, request
 from app.utils.bot_utils import add_text, add_file
-from app.openai_funcs.openai_funcs import transcribe_audio
+from app.yandex_funcs.yandex_funcs import transcribe_audio
 
 gateway_bp = Blueprint('gateway', __name__)
 

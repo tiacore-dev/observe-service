@@ -2,7 +2,7 @@ import logging
 from flask import Blueprint, request, jsonify, render_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.utils.db_get import get_prompt
-from app.openai_funcs.openai_funcs import chatgpt_analyze
+from app.yandex_funcs.yandex_funcs import chatgpt_analyze
 
 
 analysis_bp = Blueprint('analysis', __name__)

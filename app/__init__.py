@@ -10,7 +10,6 @@ from set_admin import set_admin
 from app.database import init_db, set_db_globals
 from app.s3 import init_s3_manager
 from app.routes import register_routes
-from app.openai_funcs import init_openai
 from app.utils.tg_db import sync_chats_from_messages, update_usernames
 from config import ConfigFlask
 
@@ -82,14 +81,6 @@ def create_app():
         logging.info("Бот успешно выполнил задачи и остановлен")
     except Exception as e:
         logging.error(f"Ошибка при инициализации бота: {e}")
-        raise
-
-    # Инициализация OpenAI
-    try:
-        init_openai(app)
-        logging.info("OpenAI успешно инициализирован.")
-    except Exception as e:
-        logging.error(f"Ошибка при инициализации OpenAI: {e}")
         raise
 
     # Инициализация S3
